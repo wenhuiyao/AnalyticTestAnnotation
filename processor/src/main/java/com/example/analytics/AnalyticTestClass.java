@@ -28,11 +28,11 @@ public class AnalyticTestClass {
         this.qualifiedName = typeElement.getQualifiedName().toString();
 
         final AnalyticTest annotation = typeElement.getAnnotation(AnalyticTest.class);
-        // Get the full QualifiedTypeName
         try {
+            // We have the class, it usually comes from the compiled library
             varClass = annotation.varClass();
         } catch (MirroredTypeException mte) {
-            // Class is not yet compiling
+            // Class is not yet compiling, this happens when the class is not a library class
             DeclaredType classTypeMirror = (DeclaredType) mte.getTypeMirror();
             varTypeElement = (TypeElement) classTypeMirror.asElement();
         }

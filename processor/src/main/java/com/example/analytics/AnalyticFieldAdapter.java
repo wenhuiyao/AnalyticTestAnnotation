@@ -1,5 +1,7 @@
 package com.example.analytics;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -38,8 +40,13 @@ public class AnalyticFieldAdapter {
         if( field != null ){
             return field.getClass().getCanonicalName() + "#" + field.getName();
         } else {
-            return variableElement.getEnclosingElement().getClass().getCanonicalName() + "#" + variableElement
-                    .getSimpleName();
+            final Element enclosingElement = variableElement.getEnclosingElement();
+            // expected it to be a TypeElement
+            if( enclosingElement.getKind().isClass() ){
+                return ((TypeElement)enclosingElement).getQualifiedName() + "#" + variableElement.getSimpleName();
+            }
+            // If it is not a TypeElement, return the simple name, don't spend time to figure out the full path.
+            return variableElement.getSimpleName().toString();
         }
     }
 

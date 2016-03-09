@@ -34,7 +34,7 @@ import static javax.lang.model.util.ElementFilter.fieldsIn;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 /**
- * Auto generate test code for Analytic tests.
+ * Auto generate test helper method for Analytic constant variables.
  * <p/>
  * Created by wyao on 3/8/16.
  */

@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Created by wyao on 3/8/16.
  */
-@AnalyticTest(varClass = VarContainer.class)
+@AnalyticTest(varClass = VarContainer2.class)
 public class Subclass extends SuperClass {
 
     private Map<String, Object> map = new HashMap<>();
