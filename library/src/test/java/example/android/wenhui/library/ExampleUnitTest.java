@@ -1,4 +1,4 @@
-package example.android.wenhui.analytictestannotation;
+package example.android.wenhui.library;
 
 import org.junit.Test;
 
