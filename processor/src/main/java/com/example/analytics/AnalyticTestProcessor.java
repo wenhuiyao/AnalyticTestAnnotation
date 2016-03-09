@@ -30,7 +30,7 @@ import static javax.lang.model.util.ElementFilter.fieldsIn;
 
 /**
  * Auto generate test code for Analytic tests.
- *
+ * <p/>
  * Created by wyao on 3/8/16.
  */
 @AutoService(Processor.class)
@@ -65,13 +65,13 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         try {
             for (Element annotatedElement : roundEnv.getElementsAnnotatedWith(AnalyticTest.class)) {
 
-                if (annotatedElement.getKind() != ElementKind.CLASS ) {
+                if (annotatedElement.getKind() != ElementKind.CLASS) {
                     throw new ProcessingException(annotatedElement, "only class can be annotated with @%s",
                             AnalyticTest.class.getName());
                 }
 
                 // We know it is a class type
-                TypeElement typeElement = (TypeElement)annotatedElement;
+                TypeElement typeElement = (TypeElement) annotatedElement;
                 debug(typeElement.getQualifiedName().toString());
 
                 AnalyticMapField analyticMapField = extractAnalyticMap(typeElement);
@@ -85,7 +85,7 @@ public class AnalyticTestProcessor extends AbstractProcessor {
 
         } catch (ProcessingException e) {
             error(e.getElement(), e.getMessage());
-        } catch (IOException e){
+        } catch (IOException e) {
             error(null, e.getMessage());
         }
 
@@ -96,7 +96,7 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         final List<VariableElement> variableElements = fieldsIn(typeElement.getEnclosedElements());
         for (VariableElement variableElement : variableElements) {
             final AnalyticMap annotation = variableElement.getAnnotation(AnalyticMap.class);
-            if( annotation != null ){
+            if (annotation != null) {
                 checkAnalyticMapVariable(variableElement);
                 return new AnalyticMapField(variableElement);
             }
@@ -107,45 +107,50 @@ public class AnalyticTestProcessor extends AbstractProcessor {
     }
 
 
-    private List<AnalyticVarField> extractOmnitureFieldVar(AnalyticTestClass analyticTestClass) throws ProcessingException {
+    private List<AnalyticVarField> extractOmnitureFieldVar(AnalyticTestClass analyticTestClass)
+            throws ProcessingException {
         ArrayList<AnalyticVarField> result = new ArrayList<>(20);
 
-        if( analyticTestClass.getVarClass() != null ){
+        if (analyticTestClass.getVarClass() != null) {
             final Class varClass = analyticTestClass.getVarClass();
 
             Field[] fields = varClass.getDeclaredFields();
             for (Field field : fields) {
-                final AnalyticVar annotation = field.getAnnotation(AnalyticVar.class);
-                if (annotation != null) {
-                    // Make sure it is what we expected, static final field
-//                    checkOmnitureVariable(variableElement);
-
-                    // It is annotated
-                    final AnalyticVarField e = new AnalyticVarField(field);
-                    result.add(e);
-                    debug(e.getFieldName());
+                AnalyticVarField f = newAnalyticField(new AnalyticFieldAdapter(field));
+                if (f != null) {
+                    result.add(f);
+                    debug(f.getFieldName());
                 }
             }
 
         } else {
-
             final List<VariableElement> variableElements = fieldsIn(analyticTestClass.getVarTypeElement().getEnclosedElements());
 
             for (VariableElement variableElement : variableElements) {
-                final AnalyticVar annotation = variableElement.getAnnotation(AnalyticVar.class);
-                if (annotation != null) {
-                    // Make sure it is what we expected, static final field
-                    checkOmnitureVariable(variableElement);
-
-                    // It is annotated
-                    final AnalyticVarField e = new AnalyticVarField(variableElement);
-                    result.add(e);
-                    debug(e.getFieldName());
+                AnalyticVarField f = newAnalyticField(new AnalyticFieldAdapter(variableElement));
+                if (f != null) {
+                    result.add(f);
+                    debug(f.getFieldName());
                 }
             }
         }
 
         return result;
+    }
+
+    /**
+     * @return A {@link AnalyticVarField} object if the field is annotated {@link AnalyticVar}, otherwise return null.
+     */
+    private AnalyticVarField newAnalyticField(AnalyticFieldAdapter analyticFieldAdapter) throws ProcessingException {
+        final AnalyticVar annotation = analyticFieldAdapter.getAnnotation(AnalyticVar.class);
+        if (annotation != null) {
+            // Make sure it is what we expected, static final field
+            checkOmnitureVariable(analyticFieldAdapter);
+
+            return new AnalyticVarField(analyticFieldAdapter);
+        }
+
+        return null;
     }
 
 
@@ -161,32 +166,16 @@ public class AnalyticTestProcessor extends AbstractProcessor {
 
     /**
      * Make sure the field is a static final constant field field
-     *
-     * @param variableElement
-     * @throws ProcessingException
      */
-    private void checkOmnitureVariable(VariableElement variableElement) throws ProcessingException {
+    private void checkOmnitureVariable(AnalyticFieldAdapter fieldAdapter) throws ProcessingException {
         // Make sure it is and static
+        final VariableElement variableElement = fieldAdapter.getVariableElement();
 
-        final Set<Modifier> modifiers = variableElement.getModifiers();
-
-        if (!modifiers.contains(Modifier.STATIC)) {
-            throw new ProcessingException(variableElement, "The field @% must be static field", variableElement
-                    .getSimpleName());
+        final String simpleName = fieldAdapter.getSimpleName();
+        if (!(java.lang.reflect.Modifier.isStatic(fieldAdapter.getModifiers()))) {
+            throw new ProcessingException(variableElement, "The field @%s must be static field", simpleName);
         }
 
-        // Make sure the type is String type
-
-        Object v = variableElement.getConstantValue();
-        if( v == null ){
-            throw new ProcessingException(variableElement, "Expect %s to be final", variableElement
-                    .getSimpleName() );
-        }
-
-        if( !(v instanceof String ) ){
-            throw new ProcessingException(variableElement, "Expect %s to be final and a String type", variableElement
-                    .getSimpleName() );
-        }
     }
 
     /**
@@ -199,7 +188,7 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         messager.printMessage(Diagnostic.Kind.ERROR, AnalyticTestProcessor.class.getCanonicalName() + ": " + msg, e);
     }
 
-    private void debug(Object message){
-        messager.printMessage(Diagnostic.Kind.NOTE, "Debug: " + message);
+    private void debug(Object message) {
+        System.out.println("Debug: " + message);
     }
 }

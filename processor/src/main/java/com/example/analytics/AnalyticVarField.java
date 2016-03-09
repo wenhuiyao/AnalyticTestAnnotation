@@ -3,7 +3,6 @@ package com.example.analytics;
 import example.android.wenhui.annotation.AnalyticVar;
 
 import javax.lang.model.element.VariableElement;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,31 +18,10 @@ public class AnalyticVarField {
 
     private String fieldName;
 
-    public AnalyticVarField(VariableElement fieldElement) throws ProcessingException {
-        fieldName = fieldElement.getSimpleName().toString();
-        AnalyticVar annotation = fieldElement.getAnnotation(AnalyticVar.class);
+    public AnalyticVarField(AnalyticFieldAdapter fieldAdapter) throws ProcessingException {
+        fieldName = fieldAdapter.getSimpleName();
+        AnalyticVar annotation = fieldAdapter.getAnnotation(AnalyticVar.class);
 
-        initAnnotation(annotation);
-
-        // Safe to convert, since it is already checked
-        value = (String)fieldElement.getConstantValue();
-    }
-
-    public AnalyticVarField(Field field) throws ProcessingException {
-        fieldName = field.getName();
-
-        AnalyticVar annotation = field.getAnnotation(AnalyticVar.class);
-        initAnnotation(annotation);
-
-        try {
-            value = (String)field.get(null);
-            System.out.println("Debug: value=" + value);
-        } catch (IllegalAccessException e) {
-            throw new ProcessingException(null, "Make sure the field %s is public and static", field.toString());
-        }
-    }
-
-    private void initAnnotation(AnalyticVar annotation){
         String[] matches = annotation.matchers();
 
         // equalTo will always be created
@@ -51,7 +29,39 @@ public class AnalyticVarField {
         if( matches != null && matches.length > 0 )
             hamcrestMatchers.addAll(Arrays.asList(matches));
 
-        System.out.println("matchers: " + hamcrestMatchers);
+        value = getValue(fieldAdapter);
+    }
+
+    private String getValue(AnalyticFieldAdapter fieldAdapter) throws ProcessingException {
+        // Make sure the type is String type
+
+        final VariableElement variableElement = fieldAdapter.getVariableElement();
+
+        final String simpleName = fieldAdapter.getSimpleName();
+
+        Object v;
+        try {
+            v = fieldAdapter.getValue();
+        } catch (IllegalAccessException e) {
+            throw new ProcessingException(variableElement, "Expect %s to be package or public access",
+                    simpleName);
+        }
+
+        if (v == null) {
+            throw new ProcessingException(variableElement, "Expect %s to be final", simpleName);
+        }
+
+        if (!(v instanceof String)) {
+            throw new ProcessingException(variableElement, "Expect %s to be final and a String type", simpleName);
+        }
+
+        try {
+            return (String)fieldAdapter.getValue();
+        } catch (IllegalAccessException e) {
+            throw new ProcessingException(fieldAdapter.getVariableElement(), "Make sure the field %s is "
+                    + "public and static", fieldAdapter.getSimpleName());
+        }
+
     }
 
     public String getValue(){
