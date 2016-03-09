@@ -79,7 +79,7 @@ public class AnalyticTestProcessor extends AbstractProcessor {
 
                 // We know it is a class type
                 TypeElement typeElement = (TypeElement) annotatedElement;
-                debug(typeElement.getQualifiedName().toString());
+                debug("Found %1s annotated @%2s", typeElement.getQualifiedName(), AnalyticTest.class.getSimpleName());
 
                 AnalyticMapMethod analyticMapMethod = extractAnalyticMap(typeElement);
 
@@ -108,7 +108,7 @@ public class AnalyticTestProcessor extends AbstractProcessor {
                 return new AnalyticMapMethod(executableElement);
             }
         }
-        throw new ProcessingException(typeElement, "There is must be one @%s in %s", AnalyticMap.class
+        throw new ProcessingException(typeElement, "There is must be one @%1s in %2s", AnalyticMap.class
                 .getCanonicalName(), typeElement.getQualifiedName().toString());
     }
 
@@ -125,7 +125,6 @@ public class AnalyticTestProcessor extends AbstractProcessor {
                 AnalyticVarField f = newAnalyticField(new AnalyticFieldAdapter(field));
                 if (f != null) {
                     result.add(f);
-                    debug(f.getFieldName());
                 }
             }
 
@@ -136,7 +135,6 @@ public class AnalyticTestProcessor extends AbstractProcessor {
                 AnalyticVarField f = newAnalyticField(new AnalyticFieldAdapter(variableElement));
                 if (f != null) {
                     result.add(f);
-                    debug(f.getFieldName());
                 }
             }
         }
@@ -152,7 +150,7 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         if (annotation != null) {
             // Make sure it is what we expected, static final field
             checkAnalyticVariable(analyticFieldAdapter);
-
+            debug("Auto generate test helper method for " + analyticFieldAdapter.getFullName());
             return new AnalyticVarField(analyticFieldAdapter);
         }
 
@@ -214,7 +212,8 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         messager.printMessage(Diagnostic.Kind.ERROR, AnalyticTestProcessor.class.getCanonicalName() + ": " + msg, e);
     }
 
-    private void debug(Object message) {
+    private void debug(String message, Object... args) {
+        message = String.format(message, args);
         System.out.println("Debug: " + message);
     }
 }

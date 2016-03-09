@@ -34,6 +34,15 @@ public class AnalyticFieldAdapter {
         }
     }
 
+    public String getFullName(){
+        if( field != null ){
+            return field.getClass().getCanonicalName() + "#" + field.getName();
+        } else {
+            return variableElement.getEnclosingElement().getClass().getCanonicalName() + "#" + variableElement
+                    .getSimpleName();
+        }
+    }
+
     public String getSimpleName(){
         if( field != null ){
             return field.getName();
