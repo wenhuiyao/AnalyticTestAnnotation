@@ -151,7 +151,7 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         final AnalyticVar annotation = analyticFieldAdapter.getAnnotation(AnalyticVar.class);
         if (annotation != null) {
             // Make sure it is what we expected, static final field
-            checkOmnitureVariable(analyticFieldAdapter);
+            checkAnalyticVariable(analyticFieldAdapter);
 
             return new AnalyticVarField(analyticFieldAdapter);
         }
@@ -162,50 +162,44 @@ public class AnalyticTestProcessor extends AbstractProcessor {
 
     /**
      * The method to get map must be public static, and it must take no parameter, and return {@link java.util.Map}
-     *
-     *
-     * @param element
-     * @throws ProcessingException
      */
     private void checkAnalyticMapMethod(ExecutableElement element) throws ProcessingException {
 
         final Set<Modifier> modifiers = element.getModifiers();
 
         if (!modifiers.contains(Modifier.PUBLIC)) {
-            throw new ProcessingException(element, "The @%s method must be public field", element
-                    .getSimpleName());
+            throw new ProcessingException(element, "The @%s method must be public field", AnalyticMap.class.getSimpleName());
         }
 
-        if( !modifiers.contains(Modifier.STATIC) ){
-            throw new ProcessingException(element, "The @%s method must be static field", element
-                    .getSimpleName());
+        if (!modifiers.contains(Modifier.STATIC)) {
+            throw new ProcessingException(element, "The @%s method must be static field", AnalyticMap.class.getSimpleName());
         }
 
         final List<? extends VariableElement> parameters = element.getParameters();
-        if( parameters != null && !parameters.isEmpty() ){
-            throw new ProcessingException(element, "The @%s method must have no parameter", element
+        if (parameters != null && !parameters.isEmpty()) {
+            throw new ProcessingException(element, "The @%s method must have no parameter", AnalyticMap.class
                     .getSimpleName());
         }
 
         final TypeMirror returnType = element.getReturnType();
-        String returnClass = ( (TypeElement)typeUtils.asElement(returnType) ).getQualifiedName().toString();
+        String returnClass = ((TypeElement) typeUtils.asElement(returnType)).getQualifiedName().toString();
         String mapClass = Map.class.getCanonicalName();
-        if( !mapClass.equals(returnClass) ) {
-            throw new ProcessingException(element, "The @%1s method's return type must be %2s, but get %3s", element
-                    .getSimpleName(), mapClass, returnClass);
+        if (!mapClass.equals(returnClass)) {
+            throw new ProcessingException(element, "The @%1s method's return type must be %2s, but get %3s",
+                    AnalyticMap.class.getSimpleName(), mapClass, returnClass);
         }
     }
 
     /**
      * Make sure the field is a static final constant field field
      */
-    private void checkOmnitureVariable(AnalyticFieldAdapter fieldAdapter) throws ProcessingException {
+    private void checkAnalyticVariable(AnalyticFieldAdapter fieldAdapter) throws ProcessingException {
         // Make sure it is and static
         final VariableElement variableElement = fieldAdapter.getVariableElement();
 
-        final String simpleName = fieldAdapter.getSimpleName();
         if (!(java.lang.reflect.Modifier.isStatic(fieldAdapter.getModifiers()))) {
-            throw new ProcessingException(variableElement, "The field @%s must be static field", simpleName);
+            throw new ProcessingException(variableElement, "The field @%s must be static field", AnalyticVar.class
+                    .getSimpleName());
         }
 
     }

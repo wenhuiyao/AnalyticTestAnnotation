@@ -23,16 +23,18 @@ import java.util.Set;
  */
 public class AnalyticTestCodeGenerator {
 
+    private static final String CLASS_SUFFIX = "Utils";
+    private static final String METHOD_PREFIX = "assert";
+
+    private final static String CLASS_CORE_MATCHERS = "org.hamcrest.CoreMatchers.";
+    private final static String METHOD_ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat";
+
+    private final static String MAP_NAME = Map.class.getCanonicalName();
+    private final static String STRING_NAME = String.class.getSimpleName();
+    private final static String OBJECT_NAME = Object.class.getSimpleName();
+
     private final AnalyticTestClass analyticClass;
     private final AnalyticMapMethod mAnalyticMapMethod;
-
-    private final String MAP_NAME = Map.class.getCanonicalName();
-    private final String STRING_NAME = String.class.getSimpleName();
-    private final String OBJECT_NAME = Object.class.getSimpleName();
-
-    private final String CORE_MATCHERS_CLASS = "org.hamcrest.CoreMatchers.";
-    private final String ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat";
-
     private final String MAP_OBJECT = "map";
 
     public AnalyticTestCodeGenerator(AnalyticTestClass analyticClass, AnalyticMapMethod mapField) {
@@ -43,7 +45,7 @@ public class AnalyticTestCodeGenerator {
     public void generateCode(List<AnalyticVarField> fields, Elements elementUtils,  Filer filer)
             throws IOException, ProcessingException {
 
-        String testAnalyticClass = analyticClass.getSimpleName() + "Utils";
+        String testAnalyticClass = analyticClass.getSimpleName() + CLASS_SUFFIX;
 
         PackageElement pkg = elementUtils.getPackageOf(analyticClass.getTypeElement());
         String packageName = pkg.isUnnamed() ? null : pkg.getQualifiedName().toString();
@@ -59,6 +61,18 @@ public class AnalyticTestCodeGenerator {
 
     }
 
+    /**
+     *
+     * One example:
+     * <code>
+     *  public static void assertVarOneContainsString(String str) {
+     *      java.util.Map<String, Object> map = example.android.wenhui.analytictestannotation.Subclass.getAnalyticMap();
+     *      org.hamcrest.MatcherAssert.assertThat(( String )map.get("VAR_FIRST"), org.hamcrest.CoreMatchers.containsString
+     *      (str));
+     * }
+     * </code>
+     *
+     */
     private void createMethod(AnalyticVarField field, TypeSpec.Builder typeSpec) throws ProcessingException {
         final Set<String> hamcrestMatchers = field.getHamcrestMatchers();
         for (String hamcrestMatcher : hamcrestMatchers) {
@@ -69,7 +83,7 @@ public class AnalyticTestCodeGenerator {
                         CoreMatchersMethodFactory.class.getCanonicalName());
             }
 
-            String methodName = "assert" + upperToCamelCase(field.getFieldName()) + lowerToCamelCase
+            String methodName = METHOD_PREFIX + upperToCamelCase(field.getFieldName()) + lowerToCamelCase
                     (hamcrestMatcher);
 
             MethodSpec.Builder method = MethodSpec.methodBuilder(methodName).addModifiers(Modifier.PUBLIC, Modifier.STATIC);
@@ -84,12 +98,12 @@ public class AnalyticTestCodeGenerator {
 
             method.returns(TypeName.VOID);
 
-            method.addStatement(createMapObject());
+            method.addStatement(createAssignMapObjectStatement());
 
-            String expected = String.format("( %1s )%2s.get(\"%3s\")", coreMatchersMethod.objectType().getSimpleName(),
+            String expectedValue = String.format("( %1s )%2s.get(\"%3s\")", coreMatchersMethod.objectType().getSimpleName(),
                     MAP_OBJECT, field.getValue());
-            String matcher = CORE_MATCHERS_CLASS + coreMatchersMethod.methodBlock();
-            String assertStatement = ASSERT_THAT + String.format("(%1s, %2s)", expected, matcher);
+            String matcher = CLASS_CORE_MATCHERS + coreMatchersMethod.methodBlock();
+            String assertStatement = METHOD_ASSERT_THAT + String.format("(%1s, %2s)", expectedValue, matcher);
 
             method.addStatement(assertStatement);
             typeSpec.addMethod(method.build());
@@ -99,10 +113,11 @@ public class AnalyticTestCodeGenerator {
 
     /**
      * Map map = $s.{@link example.android.wenhui.annotation.AnalyticMap};
-     * for instsance Map map = TestAnalytic.getMap();
+     * for instsance "Map map = TestAnalytic.getMap();"
+     *
      * @return
      */
-    private String createMapObject() {
+    private String createAssignMapObjectStatement() {
         final String methodName = analyticClass.getQualifiedName() + "." + mAnalyticMapMethod.getSimpleName() + "()";
         return MAP_NAME + "<" + STRING_NAME + ", " + OBJECT_NAME + "> " + MAP_OBJECT + " = " + methodName;
 

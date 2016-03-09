@@ -14,6 +14,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface AnalyticTest {
 
+    /**
+     * The class that contains all the Analytic variables which is annotated {@link AnalyticVar}
+     *
+     * @return
+     */
     Class varClass();
 
 }
