@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation used to automatically generated a set of helper method for testing.
+ * Annotation used to automatically generated a set of helper method for testing Analytic.
  *
  * Created by wyao on 3/8/16.
  */

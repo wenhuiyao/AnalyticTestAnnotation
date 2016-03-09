@@ -15,17 +15,16 @@ import java.util.Map;
 @AnalyticTest(varClass = VarContainer.class)
 public class Subclass extends SuperClass {
 
-    @AnalyticMap
-    public Map<String, Object> map = new HashMap<>();
+    private Map<String, Object> map = new HashMap<>();
 
     private static Subclass sInstance;
 
     public static Subclass getInstance(){
         if( sInstance == null ) {
             Subclass instance = new Subclass();
-            instance.map.put(VAR_ONE, "one, two, three");
-            instance.map.put(VAR_TWO, 2);
-            instance.map.put(VAR_THREE, "three");
+            instance.map.put(VarContainer.VAR_ONE, "one");
+            instance.map.put(VarContainer.VAR_TWO, 2);
+            instance.map.put(VarContainer.VAR_THREE, "three");
             instance.map.put("VAR_FOUR", true);
 
             sInstance = instance;
@@ -33,5 +32,9 @@ public class Subclass extends SuperClass {
         return sInstance;
     }
 
+    @AnalyticMap
+    public static Map<String, Object> getAnalyticMap(){
+        return getInstance().map;
+    }
 
 }

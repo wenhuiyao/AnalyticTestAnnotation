@@ -24,7 +24,7 @@ import java.util.Set;
 public class AnalyticTestCodeGenerator {
 
     private final AnalyticTestClass analyticClass;
-    private final AnalyticMapField analyticMapField;
+    private final AnalyticMapMethod mAnalyticMapMethod;
 
     private final String MAP_NAME = Map.class.getCanonicalName();
     private final String STRING_NAME = String.class.getSimpleName();
@@ -35,9 +35,9 @@ public class AnalyticTestCodeGenerator {
 
     private final String MAP_OBJECT = "map";
 
-    public AnalyticTestCodeGenerator(AnalyticTestClass analyticClass, AnalyticMapField mapField) {
+    public AnalyticTestCodeGenerator(AnalyticTestClass analyticClass, AnalyticMapMethod mapField) {
         this.analyticClass = analyticClass;
-        this.analyticMapField = mapField;
+        this.mAnalyticMapMethod = mapField;
     }
 
     public void generateCode(List<AnalyticVarField> fields, Elements elementUtils,  Filer filer)
@@ -98,13 +98,13 @@ public class AnalyticTestCodeGenerator {
     }
 
     /**
-     * Map map = $s.getInstance().{@link AnalyticMap};
+     * Map map = $s.{@link example.android.wenhui.annotation.AnalyticMap};
+     * for instsance Map map = TestAnalytic.getMap();
      * @return
      */
     private String createMapObject() {
-        final String qualifiedName = analyticClass.getQualifiedName();
-        return MAP_NAME + "<" + STRING_NAME + ", " + OBJECT_NAME + "> " + MAP_OBJECT + " = " + qualifiedName + ""
-                + ".getInstance()." + analyticMapField.getVariableName() + ";";
+        final String methodName = analyticClass.getQualifiedName() + "." + mAnalyticMapMethod.getSimpleName() + "()";
+        return MAP_NAME + "<" + STRING_NAME + ", " + OBJECT_NAME + "> " + MAP_OBJECT + " = " + methodName;
 
     }
 

@@ -6,11 +6,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Use this to annotate the map object that contains all the analytic variables, and it must be a public field
+ * Annotation for {@link AnalyticTest}. This is used to annotated the method that returns the {@link java.util.Map}
+ * object for {@link AnalyticTest}, and the method must meet the constraints:
+ *
+ * 1. Public
+ * 2. Static
+ * 3. Has not parameters
+ * 4. Must return {@link java.util.Map}
  *
  * Created by wyao on 3/8/16.
  */
-@Target(ElementType.FIELD)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.CLASS)
 public @interface AnalyticMap {
 }

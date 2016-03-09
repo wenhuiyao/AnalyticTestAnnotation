@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * 
+ *
  * Created by wyao on 3/8/16.
  */
 @Target(ElementType.FIELD)

@@ -23,12 +23,10 @@ public class SubclassTest extends TestCase {
 
     @Test
     public void testMap(){
-        SubclassUtils.assertVarOneContainsString("one");
+        SubclassUtils.assertVarOneEqualTo("one");
         SubclassUtils.assertVarTwoEqualTo(2);
         SubclassUtils.assertVarThreeAnyOf(equalTo("three"), equalTo("four"));
         SubclassUtils.assertVarFourIs(true);
     }
-
-
 
 }
