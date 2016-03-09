@@ -24,8 +24,11 @@ public class AnalyticVarField {
 
         String[] matches = annotation.matchers();
 
-        // equalTo will always be created
-        hamcrestMatchers.add("equalTo");
+        // equalTo, notNullValue, nullValue, will always be created
+        hamcrestMatchers.add(CoreMatchersMethodFactory.EQUAL_TO);
+        hamcrestMatchers.add(CoreMatchersMethodFactory.NULL_VALUE);
+        hamcrestMatchers.add(CoreMatchersMethodFactory.NOT_NULL_VALUE);
+
         if( matches != null && matches.length > 0 )
             hamcrestMatchers.addAll(Arrays.asList(matches));
 

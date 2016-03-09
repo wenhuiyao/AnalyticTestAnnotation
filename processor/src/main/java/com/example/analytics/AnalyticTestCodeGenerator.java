@@ -57,7 +57,7 @@ public class AnalyticTestCodeGenerator {
         }
 
         // Write file
-        JavaFile.builder(packageName, typeSpec.build()).build().writeTo(filer);
+        JavaFile.builder(packageName, typeSpec.build()).indent("    ").build().writeTo(filer);
 
     }
 
@@ -88,8 +88,10 @@ public class AnalyticTestCodeGenerator {
 
             MethodSpec.Builder method = MethodSpec.methodBuilder(methodName).addModifiers(Modifier.PUBLIC, Modifier.STATIC);
             final ParameterSpec[] parameters = coreMatchersMethod.parameters();
-            for (ParameterSpec parameter : parameters) {
-                method.addParameter(parameter);
+            if( parameters != null ) {
+                for (ParameterSpec parameter : parameters) {
+                    method.addParameter(parameter);
+                }
             }
 
             if(coreMatchersMethod.isParameterVarargs()){

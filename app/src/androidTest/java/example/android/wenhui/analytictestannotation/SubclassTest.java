@@ -8,18 +8,14 @@ import org.junit.runners.JUnit4;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 
-
 /**
  * Created by wyao on 3/8/16.
  */
 @RunWith(JUnit4.class)
 public class SubclassTest extends TestCase {
 
-    Subclass mSubclass;
-
     @Before
     public void setup() throws Exception {
-        mSubclass = Subclass.getInstance();
     }
 
     @Test

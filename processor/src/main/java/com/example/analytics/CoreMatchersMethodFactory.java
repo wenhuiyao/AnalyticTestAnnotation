@@ -12,15 +12,19 @@ import java.util.HashMap;
  */
 public class CoreMatchersMethodFactory {
 
-    private static final String EQUAL_TO = "equalTo";
-    private static final String CONTAINS_STRING = "containsString";
-    private static final String ANY_OF = "anyOf";
-    private static final String IS = "is";
+    public static final String EQUAL_TO = "equalTo";
+    public static final String CONTAINS_STRING = "containsString";
+    public static final String ANY_OF = "anyOf";
+    public static final String IS = "is";
+    public static final String NOT_NULL_VALUE = "notNullValue";
+    public static final String NULL_VALUE = "nullValue";
 
     private static final HashMap<String, CoreMatchersMethod> sMethodMap = new HashMap<>(5);
 
     static{
         sMethodMap.put(EQUAL_TO, new EqualTo());
+        sMethodMap.put(NOT_NULL_VALUE, new NotNullValue());
+        sMethodMap.put(NULL_VALUE, new NullValue());
         sMethodMap.put(CONTAINS_STRING, new ContainsString());
         sMethodMap.put(ANY_OF, new AnyOf());
         sMethodMap.put(IS, new Is());
@@ -51,7 +55,7 @@ public class CoreMatchersMethodFactory {
 
         @Override
         public String methodBlock() {
-            return singleMethodBlock(EQUAL_TO, parameter);
+            return singleParameterMethodBlock(EQUAL_TO, parameter);
         }
 
     }
@@ -77,7 +81,7 @@ public class CoreMatchersMethodFactory {
 
         @Override
         public String methodBlock() {
-            return singleMethodBlock(CONTAINS_STRING, parameter);
+            return singleParameterMethodBlock(CONTAINS_STRING, parameter);
         }
     }
 
@@ -105,7 +109,7 @@ public class CoreMatchersMethodFactory {
 
         @Override
         public String methodBlock() {
-            return singleMethodBlock(ANY_OF, parameter);
+            return singleParameterMethodBlock(ANY_OF, parameter);
         }
     }
 
@@ -130,16 +134,67 @@ public class CoreMatchersMethodFactory {
 
         @Override
         public String methodBlock() {
-            return singleMethodBlock(IS, parameter);
+            return singleParameterMethodBlock(IS, parameter);
         }
     }
+
+    public static class NotNullValue implements CoreMatchersMethod {
+
+        @Override
+        public Class objectType() {
+            return Object.class;
+        }
+
+        @Override
+        public boolean isParameterVarargs() {
+            return false;
+        }
+
+        @Override
+        public ParameterSpec[] parameters() {
+            return null;
+        }
+
+        @Override
+        public String methodBlock() {
+            return noParameterMethodBlock(NOT_NULL_VALUE);
+        }
+    }
+
+    public static class NullValue implements CoreMatchersMethod {
+
+        @Override
+        public Class objectType() {
+            return Object.class;
+        }
+
+        @Override
+        public boolean isParameterVarargs() {
+            return false;
+        }
+
+        @Override
+        public ParameterSpec[] parameters() {
+            return null;
+        }
+
+        @Override
+        public String methodBlock() {
+            return noParameterMethodBlock(NULL_VALUE);
+        }
+    }
+
 
     private static ParameterSpec[] singleParameterSpec(Type type, String parameterName ){
         ParameterSpec.Builder builder = ParameterSpec.builder(type, parameterName);
         return new ParameterSpec[]{builder.build()};
     }
 
-    private static String singleMethodBlock(String methodName, String parameter){
+    private static String noParameterMethodBlock(String methodName){
+        return methodName + "()";
+    }
+
+    private static String singleParameterMethodBlock(String methodName, String parameter){
         return methodName + String.format("(%s)", parameter);
     }
 

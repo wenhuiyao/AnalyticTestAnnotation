@@ -1,24 +1,25 @@
 package example.android.wenhui.analytictestannotation;
 
-
-import example.android.wenhui.library.SuperClass;
+import example.android.wenhui.annotation.AnalyticMap;
+import example.android.wenhui.annotation.AnalyticTest;
 import example.android.wenhui.library.VarContainer;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by wyao on 3/8/16.
+ * Created by wyao on 3/9/16.
  */
-public class Subclass extends SuperClass {
+@AnalyticTest(varClass = VarContainer.class)
+public class SubclassTesting {
 
     private Map<String, Object> map = new HashMap<>();
 
-    private static Subclass sInstance;
+    private static SubclassTesting sInstance;
 
-    public static Subclass getInstance(){
+    public static SubclassTesting getInstance(){
         if( sInstance == null ) {
-            Subclass instance = new Subclass();
+            SubclassTesting instance = new SubclassTesting();
             instance.map.put(VarContainer.VAR_ONE, "one");
             instance.map.put(VarContainer.VAR_TWO, 2);
             instance.map.put(VarContainer.VAR_THREE, "three");
@@ -29,12 +30,8 @@ public class Subclass extends SuperClass {
         return sInstance;
     }
 
+    @AnalyticMap
     public static Map<String, Object> getAnalyticMap(){
         return getInstance().map;
     }
-
-    public void testUsage(){
-//        SubclassUtils.assertVarOneEqualTo("one");
-    }
-
 }
