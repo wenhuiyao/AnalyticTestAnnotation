@@ -30,16 +30,14 @@ public class AnalyticTestCodeGenerator {
     private final static String METHOD_ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat";
 
     private final static String MAP_NAME = Map.class.getCanonicalName();
-    private final static String STRING_NAME = String.class.getSimpleName();
-    private final static String OBJECT_NAME = Object.class.getSimpleName();
 
     private final AnalyticTestClass analyticClass;
-    private final AnalyticMapMethod mAnalyticMapMethod;
+    private final AnalyticMapMethod analyticMapMethod;
     private final String MAP_OBJECT = "map";
 
     public AnalyticTestCodeGenerator(AnalyticTestClass analyticClass, AnalyticMapMethod mapField) {
         this.analyticClass = analyticClass;
-        this.mAnalyticMapMethod = mapField;
+        this.analyticMapMethod = mapField;
     }
 
     public void generateCode(List<AnalyticVarField> fields, Elements elementUtils,  Filer filer)
@@ -56,7 +54,10 @@ public class AnalyticTestCodeGenerator {
         TypeSpec.Builder typeSpec = TypeSpec.classBuilder(finalClassName).addModifiers(Modifier.PUBLIC);
 
         for (AnalyticVarField field : fields) {
-            createMethod(field, typeSpec);
+            final Set<String> hamcrestMatchers = field.getHamcrestMatchers();
+            for (String hamcrestMatcher : hamcrestMatchers) {
+                typeSpec.addMethod(createMethod(hamcrestMatcher, field));
+            }
         }
 
         // Write file
@@ -76,55 +77,53 @@ public class AnalyticTestCodeGenerator {
      * </code>
      *
      */
-    private void createMethod(AnalyticVarField field, TypeSpec.Builder typeSpec) throws ProcessingException {
-        final Set<String> hamcrestMatchers = field.getHamcrestMatchers();
-        for (String hamcrestMatcher : hamcrestMatchers) {
-            final CoreMatchersMethod coreMatchersMethod = CoreMatchersMethodFactory.newMethod(hamcrestMatcher);
-            if (coreMatchersMethod == null) {
-                throw new ProcessingException(analyticClass.getTypeElement(), "Please add %1s implementation to %2s",
-                        hamcrestMatcher,
-                        CoreMatchersMethodFactory.class.getCanonicalName());
-            }
-
-            String methodName = METHOD_PREFIX + upperToCamelCase(field.getFieldName()) + lowerToCamelCase
-                    (hamcrestMatcher);
-
-            MethodSpec.Builder method = MethodSpec.methodBuilder(methodName).addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-            final ParameterSpec[] parameters = coreMatchersMethod.parameters();
-            if( parameters != null ) {
-                for (ParameterSpec parameter : parameters) {
-                    method.addParameter(parameter);
-                }
-            }
-
-            if(coreMatchersMethod.isParameterVarargs()){
-                method.varargs();
-            }
-
-            method.returns(TypeName.VOID);
-
-            method.addStatement(createAssignMapObjectStatement());
-
-            String expectedValue = String.format("( %1s )%2s.get(\"%3s\")", coreMatchersMethod.expectedObjectType().getSimpleName(),
-                    MAP_OBJECT, field.getValue());
-            String matcher = CLASS_CORE_MATCHERS + coreMatchersMethod.methodBlock();
-            String assertStatement = METHOD_ASSERT_THAT + String.format("(%1s, %2s)", expectedValue, matcher);
-
-            method.addStatement(assertStatement);
-            typeSpec.addMethod(method.build());
+    MethodSpec createMethod(String hamcrestMatcher, AnalyticVarField field) throws ProcessingException {
+        final CoreMatchersMethod coreMatchersMethod = CoreMatchersMethodFactory.newMethod(hamcrestMatcher);
+        if (coreMatchersMethod == null) {
+            throw new ProcessingException(analyticClass.getTypeElement(), "Please add %1s implementation to %2s",
+                    hamcrestMatcher,
+                    CoreMatchersMethodFactory.class.getCanonicalName());
         }
 
+        String methodName = METHOD_PREFIX + upperToCamelCase(field.getFieldName()) + lowerToCamelCase
+                (hamcrestMatcher);
+
+        MethodSpec.Builder method = MethodSpec.methodBuilder(methodName).addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+        final ParameterSpec[] parameters = coreMatchersMethod.parameters();
+        if( parameters != null ) {
+            for (ParameterSpec parameter : parameters) {
+                method.addParameter(parameter);
+            }
+        }
+
+        if(coreMatchersMethod.isParameterVarargs()){
+            method.varargs();
+        }
+
+        method.returns(TypeName.VOID);
+
+        method.addStatement(createAssignMapObjectStatement());
+
+        String expectedValue = String.format("(%1s)%2s.get(\"%3s\")", coreMatchersMethod.expectedObjectType()
+                        .getCanonicalName(),
+                MAP_OBJECT, field.getValue());
+        String matcher = CLASS_CORE_MATCHERS + coreMatchersMethod.methodBlock();
+        String assertStatement = METHOD_ASSERT_THAT + String.format("(%1s, %2s)", expectedValue, matcher);
+
+        method.addStatement(assertStatement);
+
+        return method.build();
     }
 
     /**
      * Map map = $s.{@link example.android.wenhui.annotation.AnalyticMap};
-     * for instsance "Map<String, Object> map = TestAnalytic.getMap();"
+     * for instsance "Map map = TestAnalytic.getMap();"
      *
      * @return
      */
     private String createAssignMapObjectStatement() {
-        final String methodName = analyticClass.getSimpleName() + "." + mAnalyticMapMethod.getSimpleName() + "()";
-        return MAP_NAME + "<" + STRING_NAME + ", " + OBJECT_NAME + "> " + MAP_OBJECT + " = " + methodName;
+        final String methodName = analyticClass.getSimpleName() + "." + analyticMapMethod.getSimpleName() + "()";
+        return MAP_NAME + " " + MAP_OBJECT + " = " + methodName;
 
     }
 

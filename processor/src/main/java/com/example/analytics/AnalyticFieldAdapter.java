@@ -42,7 +42,7 @@ public class AnalyticFieldAdapter {
         } else {
             final Element enclosingElement = variableElement.getEnclosingElement();
             // expected it to be a TypeElement
-            if( enclosingElement.getKind().isClass() ){
+            if( enclosingElement != null && enclosingElement.getKind().isClass() ){
                 return ((TypeElement)enclosingElement).getQualifiedName() + "#" + variableElement.getSimpleName();
             }
             // If it is not a TypeElement, return the simple name, don't spend time to figure out the full path.
