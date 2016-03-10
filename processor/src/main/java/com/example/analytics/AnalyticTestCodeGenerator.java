@@ -60,7 +60,7 @@ public class AnalyticTestCodeGenerator {
         }
 
         // Write file
-        JavaFile.builder(packageName, typeSpec.build()).indent("    ").build().writeTo(filer);
+        JavaFile.builder(packageName == null ? "" : packageName, typeSpec.build()).indent("    ").build().writeTo(filer);
 
     }
 
@@ -105,7 +105,7 @@ public class AnalyticTestCodeGenerator {
 
             method.addStatement(createAssignMapObjectStatement());
 
-            String expectedValue = String.format("( %1s )%2s.get(\"%3s\")", coreMatchersMethod.objectType().getSimpleName(),
+            String expectedValue = String.format("( %1s )%2s.get(\"%3s\")", coreMatchersMethod.expectedObjectType().getSimpleName(),
                     MAP_OBJECT, field.getValue());
             String matcher = CLASS_CORE_MATCHERS + coreMatchersMethod.methodBlock();
             String assertStatement = METHOD_ASSERT_THAT + String.format("(%1s, %2s)", expectedValue, matcher);

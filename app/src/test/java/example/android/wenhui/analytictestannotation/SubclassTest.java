@@ -1,11 +1,8 @@
 package example.android.wenhui.analytictestannotation;
 
 import example.android.wenhui.analytictestannotation.helper.AnalyticTestUtils;
-import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 
@@ -13,8 +10,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 /**
  * Created by wyao on 3/8/16.
  */
-@RunWith(JUnit4.class)
-public class SubclassTest extends TestCase {
+public class SubclassTest {
 
     Subclass mSubclass;
 

@@ -11,7 +11,7 @@ public interface CoreMatchersMethod {
      * The type of the object expected to be compared, such as, String.class, Object.class
      * @return
      */
-    Class objectType();
+    Class expectedObjectType();
 
     boolean isParameterVarargs();
 
@@ -19,6 +19,10 @@ public interface CoreMatchersMethod {
 
     /**
      * The actual method block withOut the methodName(), e.g.
+     *
+     * "assertThat(expected, <b>equalTo(parameter)</b>)";
+     *
+     * This method should generate the part "equalTo(parameter)"
      * @return
      */
     String methodBlock();

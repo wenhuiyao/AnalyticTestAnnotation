@@ -39,7 +39,7 @@ public class CoreMatchersMethodFactory {
         private final String parameter = "obj";
 
         @Override
-        public Class objectType() {
+        public Class expectedObjectType() {
             return Object.class;
         }
 
@@ -65,7 +65,7 @@ public class CoreMatchersMethodFactory {
         private final String parameter = "str";
 
         @Override
-        public Class objectType() {
+        public Class expectedObjectType() {
             return String.class;
         }
 
@@ -93,7 +93,7 @@ public class CoreMatchersMethodFactory {
         private String parameter = "matchers";
 
         @Override
-        public Class objectType() {
+        public Class expectedObjectType() {
             return Object.class;
         }
 
@@ -118,7 +118,7 @@ public class CoreMatchersMethodFactory {
         private String parameter = "object";
 
         @Override
-        public Class objectType() {
+        public Class expectedObjectType() {
             return Object.class;
         }
 
@@ -141,7 +141,7 @@ public class CoreMatchersMethodFactory {
     public static class NotNullValue implements CoreMatchersMethod {
 
         @Override
-        public Class objectType() {
+        public Class expectedObjectType() {
             return Object.class;
         }
 
@@ -164,7 +164,7 @@ public class CoreMatchersMethodFactory {
     public static class NullValue implements CoreMatchersMethod {
 
         @Override
-        public Class objectType() {
+        public Class expectedObjectType() {
             return Object.class;
         }
 

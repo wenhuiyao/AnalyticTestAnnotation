@@ -166,11 +166,11 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         final Set<Modifier> modifiers = element.getModifiers();
 
         if (!modifiers.contains(Modifier.PUBLIC)) {
-            throw new ProcessingException(element, "The @%s method must be public field", AnalyticMap.class.getSimpleName());
+            throw new ProcessingException(element, "The @%s method must be public", AnalyticMap.class.getSimpleName());
         }
 
         if (!modifiers.contains(Modifier.STATIC)) {
-            throw new ProcessingException(element, "The @%s method must be static field", AnalyticMap.class.getSimpleName());
+            throw new ProcessingException(element, "The @%s method must be static", AnalyticMap.class.getSimpleName());
         }
 
         final List<? extends VariableElement> parameters = element.getParameters();
@@ -180,8 +180,13 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         }
 
         final TypeMirror returnType = element.getReturnType();
-        String returnClass = ((TypeElement) typeUtils.asElement(returnType)).getQualifiedName().toString();
         String mapClass = Map.class.getCanonicalName();
+        if( returnType.getKind().isPrimitive() ){
+            throw new ProcessingException(element, "The @%1s method's return type must be %2s",
+                    AnalyticMap.class.getSimpleName(), mapClass);
+        }
+
+        String returnClass = ((TypeElement) typeUtils.asElement(returnType)).getQualifiedName().toString();
         if (!mapClass.equals(returnClass)) {
             throw new ProcessingException(element, "The @%1s method's return type must be %2s, but get %3s",
                     AnalyticMap.class.getSimpleName(), mapClass, returnClass);
@@ -213,7 +218,6 @@ public class AnalyticTestProcessor extends AbstractProcessor {
     }
 
     private void debug(String message, Object... args) {
-        message = String.format(message, args);
-        System.out.println("Debug: " + message);
+        System.out.println("Debug: " + String.format(message, args));
     }
 }

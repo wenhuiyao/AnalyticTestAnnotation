@@ -51,20 +51,14 @@ public class AnalyticVarField {
         }
 
         if (v == null) {
-            throw new ProcessingException(variableElement, "Expect %s to be final", simpleName);
+            throw new ProcessingException(variableElement, "Expect %s to be final, and non null", simpleName);
         }
 
         if (!(v instanceof String)) {
             throw new ProcessingException(variableElement, "Expect %s to be final and a String type", simpleName);
         }
 
-        try {
-            return (String)fieldAdapter.getValue();
-        } catch (IllegalAccessException e) {
-            throw new ProcessingException(fieldAdapter.getVariableElement(), "Make sure the field %s is "
-                    + "public and static", fieldAdapter.getSimpleName());
-        }
-
+        return (String)v;
     }
 
     public String getValue(){
