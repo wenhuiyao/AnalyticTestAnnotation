@@ -11,6 +11,7 @@ dependencies {
     compile 'com.google.guava:guava:19.0'
     compile 'com.squareup:javapoet:1.0.0'
 
+    // Since this module won't be included in the final apk, it is safe to include it for assisting code generation
     compile 'org.hamcrest:hamcrest-library:1.3'
 
 }

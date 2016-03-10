@@ -21,4 +21,11 @@ public @interface AnalyticTest {
      */
     Class varClass();
 
+
+    /**
+     * The name for the final generate class
+     *
+     * @return
+     */
+    String name() default "AnalyticTestUtils";
 }

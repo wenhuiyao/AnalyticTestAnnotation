@@ -1,4 +1,4 @@
-package example.android.wenhui.analytictestannotation;
+package example.android.wenhui.analytictestannotation.helper;
 
 import example.android.wenhui.annotation.AnalyticMap;
 import example.android.wenhui.annotation.AnalyticTest;

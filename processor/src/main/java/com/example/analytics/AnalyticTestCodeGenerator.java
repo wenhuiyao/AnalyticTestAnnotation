@@ -45,12 +45,15 @@ public class AnalyticTestCodeGenerator {
     public void generateCode(List<AnalyticVarField> fields, Elements elementUtils,  Filer filer)
             throws IOException, ProcessingException {
 
-        String testAnalyticClass = analyticClass.getSimpleName() + CLASS_SUFFIX;
+        String finalClassName = analyticClass.getFinalClassName();
+        if( finalClassName == null || finalClassName.length() == 0 ){
+            finalClassName = analyticClass.getSimpleName() + CLASS_SUFFIX;
+        }
 
         PackageElement pkg = elementUtils.getPackageOf(analyticClass.getTypeElement());
         String packageName = pkg.isUnnamed() ? null : pkg.getQualifiedName().toString();
 
-        TypeSpec.Builder typeSpec = TypeSpec.classBuilder(testAnalyticClass).addModifiers(Modifier.PUBLIC);
+        TypeSpec.Builder typeSpec = TypeSpec.classBuilder(finalClassName).addModifiers(Modifier.PUBLIC);
 
         for (AnalyticVarField field : fields) {
             createMethod(field, typeSpec);
@@ -115,12 +118,12 @@ public class AnalyticTestCodeGenerator {
 
     /**
      * Map map = $s.{@link example.android.wenhui.annotation.AnalyticMap};
-     * for instsance "Map map = TestAnalytic.getMap();"
+     * for instsance "Map<String, Object> map = TestAnalytic.getMap();"
      *
      * @return
      */
     private String createAssignMapObjectStatement() {
-        final String methodName = analyticClass.getQualifiedName() + "." + mAnalyticMapMethod.getSimpleName() + "()";
+        final String methodName = analyticClass.getSimpleName() + "." + mAnalyticMapMethod.getSimpleName() + "()";
         return MAP_NAME + "<" + STRING_NAME + ", " + OBJECT_NAME + "> " + MAP_OBJECT + " = " + methodName;
 
     }

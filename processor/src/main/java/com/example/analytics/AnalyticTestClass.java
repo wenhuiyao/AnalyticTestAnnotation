@@ -15,6 +15,8 @@ public class AnalyticTestClass {
 
     private Class varClass;
 
+    private String finalClassName;
+
     private TypeElement varTypeElement;
 
     private String simpleName;
@@ -28,6 +30,8 @@ public class AnalyticTestClass {
         this.qualifiedName = typeElement.getQualifiedName().toString();
 
         final AnalyticTest annotation = typeElement.getAnnotation(AnalyticTest.class);
+        finalClassName = annotation.name();
+
         try {
             // We have the class, it usually comes from the compiled library
             varClass = annotation.varClass();
@@ -56,5 +60,9 @@ public class AnalyticTestClass {
 
     public String getQualifiedName() {
         return qualifiedName;
+    }
+
+    public String getFinalClassName() {
+        return finalClassName;
     }
 }
