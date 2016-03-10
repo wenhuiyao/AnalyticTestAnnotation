@@ -3,12 +3,8 @@ package com.example.analytics;
 import com.squareup.javapoet.ParameterSpec;
 import org.junit.Test;
 
-import static com.example.analytics.CoreMatchersMethodFactory.ANY_OF;
-import static com.example.analytics.CoreMatchersMethodFactory.CONTAINS_STRING;
-import static com.example.analytics.CoreMatchersMethodFactory.EQUAL_TO;
-import static com.example.analytics.CoreMatchersMethodFactory.IS;
-import static com.example.analytics.CoreMatchersMethodFactory.NOT_NULL_VALUE;
-import static com.example.analytics.CoreMatchersMethodFactory.NULL_VALUE;
+import static example.android.wenhui.annotation.AnalyticMatchers.*;
+
 import static com.example.analytics.CoreMatchersMethodFactory.newMethod;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;

@@ -7,6 +7,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static example.android.wenhui.annotation.AnalyticMatchers.EQUAL_TO;
+import static example.android.wenhui.annotation.AnalyticMatchers.NOT_NULL_VALUE;
+import static example.android.wenhui.annotation.AnalyticMatchers.NULL_VALUE;
+
 /**
  * Created by wyao on 3/8/16.
  */
@@ -25,9 +29,9 @@ public class AnalyticVarField {
         String[] matches = annotation.matchers();
 
         // equalTo, notNullValue, nullValue, will always be created
-        hamcrestMatchers.add(CoreMatchersMethodFactory.EQUAL_TO);
-        hamcrestMatchers.add(CoreMatchersMethodFactory.NULL_VALUE);
-        hamcrestMatchers.add(CoreMatchersMethodFactory.NOT_NULL_VALUE);
+        hamcrestMatchers.add(EQUAL_TO);
+        hamcrestMatchers.add(NULL_VALUE);
+        hamcrestMatchers.add(NOT_NULL_VALUE);
 
         if( matches != null && matches.length > 0 )
             hamcrestMatchers.addAll(Arrays.asList(matches));

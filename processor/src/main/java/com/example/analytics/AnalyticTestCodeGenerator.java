@@ -70,9 +70,8 @@ public class AnalyticTestCodeGenerator {
      * One example:
      * <code>
      *  public static void assertVarOneContainsString(String str) {
-     *      java.util.Map<String, Object> map = example.android.wenhui.analytictestannotation.Subclass.getAnalyticMap();
-     *      org.hamcrest.MatcherAssert.assertThat(( String )map.get("VAR_FIRST"), org.hamcrest.CoreMatchers.containsString
-     *      (str));
+     *      java.util.Map map = Subclass.getAnalyticMap();
+     *      org.hamcrest.MatcherAssert.assertThat((java.lang.String)map.get("VAR_FIRST"), org.hamcrest.CoreMatchers.containsString(str));
      * }
      * </code>
      *
@@ -104,11 +103,8 @@ public class AnalyticTestCodeGenerator {
 
         method.addStatement(createAssignMapObjectStatement());
 
-        String expectedValue = String.format("(%1s)%2s.get(\"%3s\")", coreMatchersMethod.expectedObjectType()
-                        .getCanonicalName(),
-                MAP_OBJECT, field.getValue());
-        String matcher = CLASS_CORE_MATCHERS + coreMatchersMethod.methodBlock();
-        String assertStatement = METHOD_ASSERT_THAT + String.format("(%1s, %2s)", expectedValue, matcher);
+        String assertStatement = createAssertStatement(coreMatchersMethod.expectedObjectType(), field.getValue(),
+                coreMatchersMethod.methodBlock());
 
         method.addStatement(assertStatement);
 
@@ -124,7 +120,20 @@ public class AnalyticTestCodeGenerator {
     private String createAssignMapObjectStatement() {
         final String methodName = analyticClass.getSimpleName() + "." + analyticMapMethod.getSimpleName() + "()";
         return MAP_NAME + " " + MAP_OBJECT + " = " + methodName;
+    }
 
+    /**
+     * It will create something like
+     * <code>
+     *     org.hamcrest.MatcherAssert.assertThat((java.lang.String)map.get("VAR_FIRST"), org.hamcrest.CoreMatchers.containsString(str));
+     * </code>
+     *
+     * @return
+     */
+    private String createAssertStatement(Class expectedType, String value, String methodBlock) {
+        String expectedValue = String.format("(%1s)%2s.get(\"%3s\")", expectedType.getCanonicalName(), MAP_OBJECT, value);
+        String matcher = CLASS_CORE_MATCHERS + methodBlock;
+        return METHOD_ASSERT_THAT + String.format("(%1s, %2s)", expectedValue, matcher);
     }
 
     /**

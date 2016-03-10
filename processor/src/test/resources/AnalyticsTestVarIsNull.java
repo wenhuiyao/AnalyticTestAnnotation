@@ -1,4 +1,4 @@
-package example.android.wenhui.analytictestannotation;
+package resources;
 
 import example.android.wenhui.annotation.AnalyticMap;
 import example.android.wenhui.annotation.AnalyticTest;
@@ -10,14 +10,14 @@ import java.util.Map;
 /**
  * Created by wyao on 3/10/16.
  */
-@AnalyticTest(varClass = AnalyticsTestMapNotStatic.class)
-public class AnalyticsTestMapNotStatic {
+@AnalyticTest(varClass = AnalyticsTestVarIsNull.class)
+public class AnalyticsTestVarIsNull {
 
     @AnalyticVar
-    private final static String VAR_ONE = "var_one";
+    private final static String VAR_ONE = null;
 
     @AnalyticMap
-    public Map<String, Object> getMap(){
+    public static Map<String, Object> getMap(){
         return new HashMap<>();
     }
 }

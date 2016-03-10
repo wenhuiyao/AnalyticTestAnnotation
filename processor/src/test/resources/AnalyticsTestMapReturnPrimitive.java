@@ -1,3 +1,5 @@
+package resources;
+
 import example.android.wenhui.annotation.AnalyticMap;
 import example.android.wenhui.annotation.AnalyticTest;
 import example.android.wenhui.annotation.AnalyticVar;

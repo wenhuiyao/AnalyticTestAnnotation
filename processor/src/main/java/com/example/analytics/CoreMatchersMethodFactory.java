@@ -6,18 +6,12 @@ import org.hamcrest.Matcher;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 
+import static example.android.wenhui.annotation.AnalyticMatchers.*;
 /**
  * A factory to assist generate method code for hamcrest core matcher methods
  * Created by wyao on 3/8/16.
  */
 public class CoreMatchersMethodFactory {
-
-    public static final String EQUAL_TO = "equalTo";
-    public static final String CONTAINS_STRING = "containsString";
-    public static final String ANY_OF = "anyOf";
-    public static final String IS = "is";
-    public static final String NOT_NULL_VALUE = "notNullValue";
-    public static final String NULL_VALUE = "nullValue";
 
     private static final HashMap<String, CoreMatchersMethod> sMethodMap = new HashMap<>(5);
 

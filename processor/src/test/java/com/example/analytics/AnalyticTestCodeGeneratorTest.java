@@ -14,9 +14,12 @@ import javax.lang.model.element.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.example.analytics.CoreMatchersMethodFactory.*;
-import static com.example.analytics.CoreMatchersMethodFactory.CONTAINS_STRING;
-import static com.example.analytics.CoreMatchersMethodFactory.EQUAL_TO;
+import static example.android.wenhui.annotation.AnalyticMatchers.ANY_OF;
+import static example.android.wenhui.annotation.AnalyticMatchers.CONTAINS_STRING;
+import static example.android.wenhui.annotation.AnalyticMatchers.EQUAL_TO;
+import static example.android.wenhui.annotation.AnalyticMatchers.IS;
+import static example.android.wenhui.annotation.AnalyticMatchers.NOT_NULL_VALUE;
+import static example.android.wenhui.annotation.AnalyticMatchers.NULL_VALUE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;

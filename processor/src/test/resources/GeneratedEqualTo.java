@@ -1,3 +1,5 @@
+package resources;
+
 import java.lang.Object;
 
 public class GeneratedEqualTo {

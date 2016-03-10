@@ -127,7 +127,7 @@ public class AnalyticTestProcessTest {
     public void testGenerateCode_analyticVariableMatcherNotSupported() {
         String errorMessage = String.format("Please add %1s implementation to %2s",
                 "notSupported",
-                CoreMatchersMethodFactoryTest.class.getCanonicalName());
+                CoreMatchersMethodFactory.class.getCanonicalName());
         assert_().about(javaSource()).that(JavaFileObjects.forResource("AnalyticsTestVarNotSupportMatchers.java"))
                 .processedWith(new AnalyticTestProcessor())
                 .failsToCompile().withErrorContaining(errorMessage);

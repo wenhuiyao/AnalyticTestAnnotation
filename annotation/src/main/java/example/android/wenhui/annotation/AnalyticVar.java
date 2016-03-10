@@ -20,6 +20,5 @@ public @interface AnalyticVar {
      *
      * @return
      */
-    String[] matchers() default {"equalTo", "notNullValue", "nullValue"};
-
+    String[] matchers() default {AnalyticMatchers.EQUAL_TO, AnalyticMatchers.NOT_NULL_VALUE, AnalyticMatchers.NULL_VALUE};
 }

@@ -16,3 +16,12 @@ dependencies {
     testCompile 'org.mockito:mockito-core:1.9.5'
     testCompile 'com.google.testing.compile:compile-testing:0.9'
 }
+
+// Copy test resources files to build directory, so unit tests can find them.
+// It is a known issue: https://code.google.com/p/android/issues/detail?id=64887
+task copyTestResources(type: Copy) {
+    from "${projectDir}/src/test/resources"
+    into "${buildDir}/classes/test"
+}
+
+processTestResources.dependsOn copyTestResources

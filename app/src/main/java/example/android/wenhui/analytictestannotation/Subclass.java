@@ -21,7 +21,7 @@ public class Subclass extends SuperClass {
             Subclass instance = new Subclass();
             instance.map.put(VarContainer.VAR_ONE, "one");
             instance.map.put(VarContainer.VAR_TWO, 2);
-            instance.map.put(VarContainer.VAR_THREE, "three");
+            instance.map.put("VAR_THREE", "three");
             instance.map.put("VAR_FOUR", true);
 
             sInstance = instance;
