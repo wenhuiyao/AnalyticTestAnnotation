@@ -1,5 +1,6 @@
 package com.example.analytics;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 
 /**
@@ -20,10 +21,10 @@ public interface CoreMatchersMethod {
     /**
      * The actual method block withOut the methodName(), e.g.
      *
-     * "assertThat(expected, <b>equalTo(parameter)</b>)";
+     * "assertThat(expected, <b>CoreMatchers.equalTo(parameter)</b>)";
      *
      * This method should generate the part "equalTo(parameter)"
      * @return
      */
-    String methodBlock();
+    CodeBlock methodBlock();
 }

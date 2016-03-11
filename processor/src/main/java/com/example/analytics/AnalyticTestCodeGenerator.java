@@ -1,11 +1,13 @@
 package com.example.analytics;
 
 import com.google.common.base.CaseFormat;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.hamcrest.MatcherAssert;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
@@ -26,10 +28,7 @@ public class AnalyticTestCodeGenerator {
     private static final String CLASS_SUFFIX = "Utils";
     private static final String METHOD_PREFIX = "assert";
 
-    private final static String CLASS_CORE_MATCHERS = "org.hamcrest.CoreMatchers.";
-    private final static String METHOD_ASSERT_THAT = "org.hamcrest.MatcherAssert.assertThat";
-
-    private final static String MAP_NAME = Map.class.getCanonicalName();
+    private final static String METHOD_ASSERT_THAT = "assertThat";
 
     private final AnalyticTestClass analyticClass;
     private final AnalyticMapMethod analyticMapMethod;
@@ -69,10 +68,10 @@ public class AnalyticTestCodeGenerator {
      *
      * One example:
      * <code>
-     *  public static void assertVarOneContainsString(String str) {
-     *      java.util.Map map = Subclass.getAnalyticMap();
-     *      org.hamcrest.MatcherAssert.assertThat((java.lang.String)map.get("VAR_FIRST"), org.hamcrest.CoreMatchers.containsString(str));
-     * }
+     *      public static void assertVarOneContainsString(String str) {
+     *          Map map = SubclassTesting.getAnalyticMap();
+     *          MatcherAssert.assertThat((String)map.get("VAR_FIRST"), CoreMatchers.containsString(str));
+     *      }
      * </code>
      *
      */
@@ -87,7 +86,9 @@ public class AnalyticTestCodeGenerator {
         String methodName = METHOD_PREFIX + upperToCamelCase(field.getFieldName()) + lowerToCamelCase
                 (hamcrestMatcher);
 
-        MethodSpec.Builder method = MethodSpec.methodBuilder(methodName).addModifiers(Modifier.PUBLIC, Modifier.STATIC);
+        MethodSpec.Builder method = MethodSpec.methodBuilder(methodName).addModifiers(Modifier.PUBLIC, Modifier
+                .STATIC).returns(TypeName.VOID);
+
         final ParameterSpec[] parameters = coreMatchersMethod.parameters();
         if( parameters != null ) {
             for (ParameterSpec parameter : parameters) {
@@ -99,41 +100,17 @@ public class AnalyticTestCodeGenerator {
             method.varargs();
         }
 
-        method.returns(TypeName.VOID);
+        // Map map = TestAnalytic.getMap();
+        method.addStatement( "$T $L = $L.$L()", Map.class, MAP_OBJECT, analyticClass.getSimpleName(),
+                analyticMapMethod.getSimpleName());
 
-        method.addStatement(createAssignMapObjectStatement());
-
-        String assertStatement = createAssertStatement(coreMatchersMethod.expectedObjectType(), field.getValue(),
-                coreMatchersMethod.methodBlock());
-
-        method.addStatement(assertStatement);
+        //  MatcherAssert.assertThat((String)map.get("VAR_FIRST"), CoreMatchers.containsString(str));
+        CodeBlock expectBlock = CodeBlock.builder().add("($T)$L.get($S)", coreMatchersMethod.expectedObjectType(),
+                MAP_OBJECT, field.getValue()).build();
+        method.addStatement("$T.$L($L, $L)", MatcherAssert.class, METHOD_ASSERT_THAT, expectBlock, coreMatchersMethod
+                .methodBlock());
 
         return method.build();
-    }
-
-    /**
-     * Map map = $s.{@link example.android.wenhui.annotation.AnalyticMap};
-     * for instsance "Map map = TestAnalytic.getMap();"
-     *
-     * @return
-     */
-    private String createAssignMapObjectStatement() {
-        final String methodName = analyticClass.getSimpleName() + "." + analyticMapMethod.getSimpleName() + "()";
-        return MAP_NAME + " " + MAP_OBJECT + " = " + methodName;
-    }
-
-    /**
-     * It will create something like
-     * <code>
-     *     org.hamcrest.MatcherAssert.assertThat((java.lang.String)map.get("VAR_FIRST"), org.hamcrest.CoreMatchers.containsString(str));
-     * </code>
-     *
-     * @return
-     */
-    private String createAssertStatement(Class expectedType, String value, String methodBlock) {
-        String expectedValue = String.format("(%1s)%2s.get(\"%3s\")", expectedType.getCanonicalName(), MAP_OBJECT, value);
-        String matcher = CLASS_CORE_MATCHERS + methodBlock;
-        return METHOD_ASSERT_THAT + String.format("(%1s, %2s)", expectedValue, matcher);
     }
 
     /**

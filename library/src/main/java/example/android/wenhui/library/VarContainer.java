@@ -12,7 +12,7 @@ import static example.android.wenhui.annotation.AnalyticMatchers.IS;
  */
 public class VarContainer {
 
-    @AnalyticVar(matchers = {CONTAINS_STRING})
+    @AnalyticVar(matchers = {CONTAINS_STRING, IS, ANY_OF})
     public final static String VAR_ONE = "VAR_FIRST";
 
     @AnalyticVar

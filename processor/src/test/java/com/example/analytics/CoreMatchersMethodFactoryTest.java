@@ -1,6 +1,7 @@
 package com.example.analytics;
 
 import com.squareup.javapoet.ParameterSpec;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import static example.android.wenhui.annotation.AnalyticMatchers.*;
@@ -44,8 +45,8 @@ public class CoreMatchersMethodFactoryTest {
         String expected = "java.lang.Object obj";
         assertThat(parameterString, equalTo(expected));
 
-        String methodBlack = coreMatchersMethod.methodBlock();
-        expected = "equalTo(obj)";
+        String methodBlack = coreMatchersMethod.methodBlock().toString();
+        expected = CoreMatchers.class.getCanonicalName() + ".equalTo(obj)";
         assertThat(methodBlack, equalTo(expected));
     }
 
@@ -63,8 +64,8 @@ public class CoreMatchersMethodFactoryTest {
         String expected = "java.lang.String str";
         assertThat(parameterString, equalTo(expected));
 
-        String methodBlack = coreMatchersMethod.methodBlock();
-        expected = "containsString(str)";
+        String methodBlack = coreMatchersMethod.methodBlock().toString();
+        expected = CoreMatchers.class.getCanonicalName() + ".containsString(str)";
         assertThat(methodBlack, equalTo(expected));
     }
 
@@ -83,8 +84,8 @@ public class CoreMatchersMethodFactoryTest {
         String expected = "org.hamcrest.Matcher[] matchers";
         assertThat(parameterString, equalTo(expected));
 
-        String methodBlack = coreMatchersMethod.methodBlock();
-        expected = "anyOf(matchers)";
+        String methodBlack = coreMatchersMethod.methodBlock().toString();
+        expected = CoreMatchers.class.getCanonicalName() +".anyOf(matchers)";
         assertThat(methodBlack, equalTo(expected));
     }
 
@@ -103,8 +104,8 @@ public class CoreMatchersMethodFactoryTest {
         String expected = "java.lang.Object object";
         assertThat(parameterString, equalTo(expected));
 
-        String methodBlack = coreMatchersMethod.methodBlock();
-        expected = "is(object)";
+        String methodBlack = coreMatchersMethod.methodBlock().toString();
+        expected = CoreMatchers.class.getCanonicalName() + ".is(object)";
         assertThat(methodBlack, equalTo(expected));
     }
 
@@ -118,8 +119,8 @@ public class CoreMatchersMethodFactoryTest {
 
         assertThat(coreMatchersMethod.parameters(), nullValue());
 
-        String methodBlack = coreMatchersMethod.methodBlock();
-        String expected = "notNullValue()";
+        String methodBlack = coreMatchersMethod.methodBlock().toString();
+        String expected = CoreMatchers.class.getCanonicalName() + ".notNullValue()";
         assertThat(methodBlack, equalTo(expected));
     }
 
@@ -133,8 +134,8 @@ public class CoreMatchersMethodFactoryTest {
 
         assertThat(coreMatchersMethod.parameters(), nullValue());
 
-        String methodBlack = coreMatchersMethod.methodBlock();
-        String expected = "nullValue()";
+        String methodBlack = coreMatchersMethod.methodBlock().toString();
+        String expected = CoreMatchers.class.getCanonicalName() + ".nullValue()";
         assertThat(methodBlack, equalTo(expected));
     }
 

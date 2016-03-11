@@ -1,6 +1,8 @@
 package com.example.analytics;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 
 import java.lang.reflect.Type;
@@ -13,7 +15,7 @@ import static example.android.wenhui.annotation.AnalyticMatchers.*;
  */
 public class CoreMatchersMethodFactory {
 
-    private static final HashMap<String, CoreMatchersMethod> sMethodMap = new HashMap<>(5);
+    private static final HashMap<String, CoreMatchersMethod> sMethodMap = new HashMap<>(6);
 
     static{
         sMethodMap.put(EQUAL_TO, new EqualTo());
@@ -48,7 +50,7 @@ public class CoreMatchersMethodFactory {
         }
 
         @Override
-        public String methodBlock() {
+        public CodeBlock methodBlock() {
             return singleParameterMethodBlock(EQUAL_TO, parameter);
         }
 
@@ -74,7 +76,7 @@ public class CoreMatchersMethodFactory {
         }
 
         @Override
-        public String methodBlock() {
+        public CodeBlock methodBlock() {
             return singleParameterMethodBlock(CONTAINS_STRING, parameter);
         }
     }
@@ -102,7 +104,7 @@ public class CoreMatchersMethodFactory {
         }
 
         @Override
-        public String methodBlock() {
+        public CodeBlock methodBlock() {
             return singleParameterMethodBlock(ANY_OF, parameter);
         }
     }
@@ -127,7 +129,7 @@ public class CoreMatchersMethodFactory {
         }
 
         @Override
-        public String methodBlock() {
+        public CodeBlock methodBlock() {
             return singleParameterMethodBlock(IS, parameter);
         }
     }
@@ -150,7 +152,7 @@ public class CoreMatchersMethodFactory {
         }
 
         @Override
-        public String methodBlock() {
+        public CodeBlock methodBlock() {
             return noParameterMethodBlock(NOT_NULL_VALUE);
         }
     }
@@ -173,7 +175,7 @@ public class CoreMatchersMethodFactory {
         }
 
         @Override
-        public String methodBlock() {
+        public CodeBlock methodBlock() {
             return noParameterMethodBlock(NULL_VALUE);
         }
     }
@@ -184,12 +186,12 @@ public class CoreMatchersMethodFactory {
         return new ParameterSpec[]{builder.build()};
     }
 
-    private static String noParameterMethodBlock(String methodName){
-        return methodName + "()";
+    private static CodeBlock noParameterMethodBlock(String methodName){
+        return CodeBlock.builder().add("$T.$L()", CoreMatchers.class, methodName).build();
     }
 
-    private static String singleParameterMethodBlock(String methodName, String parameter){
-        return methodName + String.format("(%s)", parameter);
+    private static CodeBlock singleParameterMethodBlock(String methodName, String parameter){
+        return CodeBlock.builder().add("$T.$L($L)", CoreMatchers.class, methodName, parameter).build();
     }
 
 }
