@@ -1,12 +1,24 @@
 package com.example.analytics;
 
+import com.example.analytics.mock.MockElements;
+import com.example.analytics.mock.MockTypeMirror;
+import com.example.analytics.mock.MockTypes;
 import com.squareup.javapoet.ParameterSpec;
 import org.hamcrest.CoreMatchers;
+import org.junit.Before;
 import org.junit.Test;
 
-import static example.android.wenhui.annotation.AnalyticMatchers.*;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 import static com.example.analytics.CoreMatchersMethodFactory.newMethod;
+import static example.android.wenhui.annotation.AnalyticMatchers.ANY_OF;
+import static example.android.wenhui.annotation.AnalyticMatchers.CONTAINS_STRING;
+import static example.android.wenhui.annotation.AnalyticMatchers.EQUAL_TO;
+import static example.android.wenhui.annotation.AnalyticMatchers.IS;
+import static example.android.wenhui.annotation.AnalyticMatchers.NOT_NULL_VALUE;
+import static example.android.wenhui.annotation.AnalyticMatchers.NULL_VALUE;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
@@ -18,6 +30,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * Created by wyao on 3/10/16.
  */
 public class CoreMatchersMethodFactoryTest {
+
+    private Elements elementUtils;
+    private Types typeUtils;
+
+    private TypeMirror mapValueType;
+
+    @Before
+    public void setup() throws Exception {
+        elementUtils = new MockElements();
+        typeUtils = new MockTypes();
+        mapValueType = new MockTypeMirror(Object.class);
+    }
 
     @Test
     public void testSupportedMethods() {
@@ -31,11 +55,11 @@ public class CoreMatchersMethodFactoryTest {
 
 
     @Test
-    public void testEqualToMethod() {
+    public void testEqualToMethod() throws ProcessingException {
 
         final CoreMatchersMethod coreMatchersMethod = newMethod(EQUAL_TO);
 
-        assertThat(coreMatchersMethod.expectedObjectType(), isA(Object.class));
+        assertThat(coreMatchersMethod.expectedObjectType(elementUtils, typeUtils, mapValueType), isA(Object.class));
         assertThat(coreMatchersMethod.isParameterVarargs(), is(false));
 
         final ParameterSpec[] parameters = coreMatchersMethod.parameters();
@@ -51,10 +75,11 @@ public class CoreMatchersMethodFactoryTest {
     }
 
     @Test
-    public void testContainsStringMethod(){
+    public void testContainsStringMethod() throws ProcessingException {
         final CoreMatchersMethod coreMatchersMethod = newMethod(CONTAINS_STRING);
 
-        assertThat(coreMatchersMethod.expectedObjectType().getCanonicalName(), equalTo(String.class.getCanonicalName()));
+        assertThat(coreMatchersMethod.expectedObjectType(elementUtils, typeUtils, mapValueType).toString(), equalTo(String
+                .class.getCanonicalName()));
         assertThat(coreMatchersMethod.isParameterVarargs(), is(false));
 
         final ParameterSpec[] parameters = coreMatchersMethod.parameters();
@@ -70,10 +95,11 @@ public class CoreMatchersMethodFactoryTest {
     }
 
     @Test
-    public void testAnyOfMethod(){
+    public void testAnyOfMethod() throws ProcessingException {
         final CoreMatchersMethod coreMatchersMethod = newMethod(ANY_OF);
 
-        assertThat(coreMatchersMethod.expectedObjectType().getCanonicalName(), equalTo(Object.class.getCanonicalName
+        assertThat(coreMatchersMethod.expectedObjectType(elementUtils, typeUtils, mapValueType).toString(), equalTo(Object
+                .class.getCanonicalName
                 ()));
         assertThat(coreMatchersMethod.isParameterVarargs(), is(true));
 
@@ -90,10 +116,11 @@ public class CoreMatchersMethodFactoryTest {
     }
 
     @Test
-    public void testIsMethod(){
+    public void testIsMethod() throws ProcessingException {
         final CoreMatchersMethod coreMatchersMethod = newMethod(IS);
 
-        assertThat(coreMatchersMethod.expectedObjectType().getCanonicalName(), equalTo(Object.class.getCanonicalName
+        assertThat(coreMatchersMethod.expectedObjectType(elementUtils, typeUtils, mapValueType).toString(), equalTo(Object
+                .class.getCanonicalName
                 ()));
         assertThat(coreMatchersMethod.isParameterVarargs(), is(false));
 
@@ -110,10 +137,11 @@ public class CoreMatchersMethodFactoryTest {
     }
 
     @Test
-    public void testNotNullValueMethod(){
+    public void testNotNullValueMethod() throws ProcessingException {
         final CoreMatchersMethod coreMatchersMethod = newMethod(NOT_NULL_VALUE);
 
-        assertThat(coreMatchersMethod.expectedObjectType().getCanonicalName(), equalTo(Object.class.getCanonicalName
+        assertThat(coreMatchersMethod.expectedObjectType(elementUtils, typeUtils, mapValueType).toString(), equalTo(Object
+                .class.getCanonicalName
                 ()));
         assertThat(coreMatchersMethod.isParameterVarargs(), is(false));
 
@@ -125,11 +153,11 @@ public class CoreMatchersMethodFactoryTest {
     }
 
     @Test
-    public void testNullValueMethod(){
+    public void testNullValueMethod() throws ProcessingException {
         final CoreMatchersMethod coreMatchersMethod = newMethod(NULL_VALUE);
 
-        assertThat(coreMatchersMethod.expectedObjectType().getCanonicalName(), equalTo(Object.class.getCanonicalName
-                ()));
+        assertThat(coreMatchersMethod.expectedObjectType(elementUtils, typeUtils, mapValueType).toString(), equalTo
+                (Object.class.getCanonicalName()));
         assertThat(coreMatchersMethod.isParameterVarargs(), is(false));
 
         assertThat(coreMatchersMethod.parameters(), nullValue());

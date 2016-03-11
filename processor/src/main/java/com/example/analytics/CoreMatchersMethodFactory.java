@@ -5,6 +5,9 @@ import com.squareup.javapoet.ParameterSpec;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 
@@ -35,8 +38,8 @@ public class CoreMatchersMethodFactory {
         private final String parameter = "obj";
 
         @Override
-        public Class expectedObjectType() {
-            return Object.class;
+        public TypeMirror expectedObjectType(Elements elementUtils, Types typeUtils, TypeMirror mapValueType) {
+            return mapValueType;
         }
 
         @Override
@@ -61,8 +64,14 @@ public class CoreMatchersMethodFactory {
         private final String parameter = "str";
 
         @Override
-        public Class expectedObjectType() {
-            return String.class;
+        public TypeMirror expectedObjectType(Elements elementUtils, Types typeUtils, TypeMirror mapValueType) throws
+                ProcessingException {
+            TypeMirror stringType = fromClassToTypeMirror(elementUtils, String.class);
+            if( !typeUtils.isAssignable(stringType, mapValueType) ){
+                throw new ProcessingException(null, "The value type %1s in map @%2s isn't super type of String",
+                        mapValueType.toString(), AnalyticMapMethod.class.getSimpleName());
+            }
+            return stringType;
         }
 
         @Override
@@ -89,8 +98,8 @@ public class CoreMatchersMethodFactory {
         private String parameter = "matchers";
 
         @Override
-        public Class expectedObjectType() {
-            return Object.class;
+        public TypeMirror expectedObjectType(Elements elementUtils, Types typeUtils, TypeMirror mapValueType) {
+            return mapValueType;
         }
 
         @Override
@@ -114,8 +123,8 @@ public class CoreMatchersMethodFactory {
         private String parameter = "object";
 
         @Override
-        public Class expectedObjectType() {
-            return Object.class;
+        public TypeMirror expectedObjectType(Elements elementUtils, Types typeUtils, TypeMirror mapValueType) {
+            return mapValueType;
         }
 
         @Override
@@ -137,8 +146,8 @@ public class CoreMatchersMethodFactory {
     public static class NotNullValue implements CoreMatchersMethod {
 
         @Override
-        public Class expectedObjectType() {
-            return Object.class;
+        public TypeMirror expectedObjectType(Elements elementUtils, Types typeUtils, TypeMirror mapValueType) {
+            return mapValueType;
         }
 
         @Override
@@ -160,8 +169,8 @@ public class CoreMatchersMethodFactory {
     public static class NullValue implements CoreMatchersMethod {
 
         @Override
-        public Class expectedObjectType() {
-            return Object.class;
+        public TypeMirror expectedObjectType(Elements elementUtils, Types typeUtils, TypeMirror mapValueType) {
+            return mapValueType;
         }
 
         @Override
@@ -192,6 +201,10 @@ public class CoreMatchersMethodFactory {
 
     private static CodeBlock singleParameterMethodBlock(String methodName, String parameter){
         return CodeBlock.builder().add("$T.$L($L)", CoreMatchers.class, methodName, parameter).build();
+    }
+
+    static TypeMirror fromClassToTypeMirror(Elements elementUtils, Class<?> clazz){
+        return elementUtils.getTypeElement(clazz.getCanonicalName()).asType();
     }
 
 }

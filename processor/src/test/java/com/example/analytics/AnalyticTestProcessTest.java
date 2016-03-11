@@ -5,6 +5,8 @@ import example.android.wenhui.annotation.AnalyticMap;
 import example.android.wenhui.annotation.AnalyticVar;
 import org.junit.Test;
 
+import javax.lang.model.type.DeclaredType;
+
 import static com.google.common.truth.Truth.assert_;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 
@@ -114,7 +116,7 @@ public class AnalyticTestProcessTest {
     @Test
     public void testGenerateCode_mapMethodReturnPrimitive() {
         String errorMessage = String.format("The @%1s method's return type must be %2s", AnalyticMap.class
-                .getSimpleName(), "java.util.Map");
+                .getSimpleName(), DeclaredType.class.getCanonicalName());
         assert_().about(javaSource()).that(JavaFileObjects.forResource("AnalyticsTestMapReturnPrimitive.java"))
                 .processedWith(new AnalyticTestProcessor())
                 .failsToCompile().withErrorContaining(errorMessage);

@@ -21,15 +21,22 @@ import java.util.Set;
 public class MockExecutableElement implements ExecutableElement {
 
     private Name simpleName;
+    private Set<Modifier> modifiers;
+    private TypeMirror returnType;
+
 
     @Override
     public List<? extends TypeParameterElement> getTypeParameters() {
         return null;
     }
 
+    public void setReturnType(TypeMirror type){
+        this.returnType = type;
+    }
+
     @Override
     public TypeMirror getReturnType() {
-        return null;
+        return returnType;
     }
 
     @Override
@@ -72,9 +79,13 @@ public class MockExecutableElement implements ExecutableElement {
         return null;
     }
 
+    public void setModifier(Set<Modifier> modifiers){
+        this.modifiers = modifiers;
+    }
+
     @Override
     public Set<Modifier> getModifiers() {
-        return null;
+        return modifiers;
     }
 
     public void setSimpleName(Name name){

@@ -1,17 +1,26 @@
 package com.example.analytics;
 
+import com.example.analytics.mock.MockElements;
 import com.example.analytics.mock.MockExecutableElement;
 import com.example.analytics.mock.MockName;
 import com.example.analytics.mock.MockTypeElement;
+import com.example.analytics.mock.MockTypeMirror;
+import com.example.analytics.mock.MockTypes;
 import com.example.analytics.mock.MockVariableElement;
 import com.squareup.javapoet.MethodSpec;
 import example.android.wenhui.annotation.AnalyticTest;
 import example.android.wenhui.annotation.AnalyticVar;
 import org.hamcrest.Matcher;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.lang.model.element.Modifier;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static example.android.wenhui.annotation.AnalyticMatchers.ANY_OF;
@@ -29,21 +38,29 @@ import static org.mockito.Mockito.when;
  */
 public class AnalyticTestCodeGeneratorTest {
 
-    private static final String SIMPLE_CLASS_NAME = "AnalyticTest";
-    private static final String QUALIFIED_NAME = "com.example.test.AnalyticTest";
-
     private static final String SIMPLE_METHOD_NAME = "getMap";
 
     private static final String VARIABLE = "VAR_ONE";
     private static final String VARIABLE_UPPER_LOWER = "VarOne";
     private static final String VARIABLE_VALUE = "var_one";
 
+    private Elements elementUtils;
+    private Types typeUtils;
+    private Class analyticTestClass;
+
+    @Before
+    public void setup() throws Exception {
+        elementUtils = new MockElements();
+        typeUtils = new MockTypes();
+        analyticTestClass = AnalyticTestCodeGeneratorTest.class;
+    }
+
     @Test
     public void testGenerateMethod_equalTo() throws Exception {
         AnalyticTestCodeGenerator generator = newCodeGenerator();
 
-        AnalyticVarField field = new AnalyticVarField(newMockFieldAdapter(new String[] {EQUAL_TO}));
-        final MethodSpec method = generator.createMethod(EQUAL_TO, field);
+        AnalyticVarField field = new AnalyticVarField(newMockVariableElement(new String[] {EQUAL_TO}));
+        final MethodSpec method = generator.createMethod(elementUtils, typeUtils, EQUAL_TO, field);
 
         String got = method.toString();
         String expected = getStandardMethodString("EqualTo", Object.class, "obj", Object.class, EQUAL_TO);
@@ -55,8 +72,8 @@ public class AnalyticTestCodeGeneratorTest {
 
         AnalyticTestCodeGenerator generator = newCodeGenerator();
 
-        AnalyticVarField field = new AnalyticVarField(newMockFieldAdapter(new String[] {CONTAINS_STRING}));
-        final MethodSpec method = generator.createMethod(CONTAINS_STRING, field);
+        AnalyticVarField field = new AnalyticVarField(newMockVariableElement(new String[] {CONTAINS_STRING}));
+        final MethodSpec method = generator.createMethod(elementUtils, typeUtils, CONTAINS_STRING, field);
 
         String got = method.toString();
         String expected = getStandardMethodString("ContainsString", String.class, "str", String.class, CONTAINS_STRING);
@@ -67,8 +84,8 @@ public class AnalyticTestCodeGeneratorTest {
     public void testGenerateMethod_anyOf() throws Exception {
         AnalyticTestCodeGenerator generator = newCodeGenerator();
 
-        AnalyticVarField field = new AnalyticVarField(newMockFieldAdapter(new String[] {ANY_OF}));
-        final MethodSpec method = generator.createMethod(ANY_OF, field);
+        AnalyticVarField field = new AnalyticVarField(newMockVariableElement(new String[] {ANY_OF}));
+        final MethodSpec method = generator.createMethod(elementUtils, typeUtils, ANY_OF, field);
 
         String got = method.toString();
         String expected = getStandardMethodString("AnyOf", Matcher[].class, "matchers", Object.class, ANY_OF);
@@ -81,8 +98,8 @@ public class AnalyticTestCodeGeneratorTest {
 
         AnalyticTestCodeGenerator generator = newCodeGenerator();
 
-        AnalyticVarField field = new AnalyticVarField(newMockFieldAdapter(new String[] {IS}));
-        final MethodSpec method = generator.createMethod(IS, field);
+        AnalyticVarField field = new AnalyticVarField(newMockVariableElement(new String[] {IS}));
+        final MethodSpec method = generator.createMethod(elementUtils, typeUtils, IS, field);
 
         String got = method.toString();
         String expected = getStandardMethodString("Is", Object.class, "object", Object.class, IS);
@@ -94,8 +111,8 @@ public class AnalyticTestCodeGeneratorTest {
 
         AnalyticTestCodeGenerator generator = newCodeGenerator();
 
-        AnalyticVarField field = new AnalyticVarField(newMockFieldAdapter(new String[] {NOT_NULL_VALUE}));
-        final MethodSpec method = generator.createMethod(NOT_NULL_VALUE, field);
+        AnalyticVarField field = new AnalyticVarField(newMockVariableElement(new String[] {NOT_NULL_VALUE}));
+        final MethodSpec method = generator.createMethod(elementUtils, typeUtils, NOT_NULL_VALUE, field);
 
         String got = method.toString();
         String expected = getStandardMethodString("NotNullValue", null, "", Object.class, NOT_NULL_VALUE);
@@ -108,8 +125,8 @@ public class AnalyticTestCodeGeneratorTest {
 
         AnalyticTestCodeGenerator generator = newCodeGenerator();
 
-        AnalyticVarField field = new AnalyticVarField(newMockFieldAdapter(new String[] {NULL_VALUE}));
-        final MethodSpec method = generator.createMethod(NULL_VALUE, field);
+        AnalyticVarField field = new AnalyticVarField(newMockVariableElement(new String[] {NULL_VALUE}));
+        final MethodSpec method = generator.createMethod(elementUtils, typeUtils, NULL_VALUE, field);
 
         String got = method.toString();
         String expected = getStandardMethodString("NullValue", null, "", Object.class, NULL_VALUE);
@@ -144,30 +161,28 @@ public class AnalyticTestCodeGeneratorTest {
         }
 
         return String.format(EXPECTED_METHOD_FORMAT, VARIABLE_UPPER_LOWER, methodNameUpLow, parameterType,
-                objName, SIMPLE_CLASS_NAME, SIMPLE_METHOD_NAME, covertTypeClass.getCanonicalName(), VARIABLE_VALUE, methodName,
-                objName);
+                objName, analyticTestClass.getSimpleName(), SIMPLE_METHOD_NAME, covertTypeClass.getCanonicalName(),
+                VARIABLE_VALUE, methodName, objName);
     }
 
-    private AnalyticTestCodeGenerator newCodeGenerator(){
+    private AnalyticTestCodeGenerator newCodeGenerator() throws ProcessingException{
         MockTypeElement typeElement = newMockTypeElement();
         MockExecutableElement executableElement = newMockExecutableElement();
 
-        AnalyticTestClass testClass = new AnalyticTestClass(typeElement);
-        AnalyticMapMethod mapMethod = new AnalyticMapMethod(executableElement);
+        AnalyticTestClass testClass = new AnalyticTestClass(typeElement, elementUtils);
+        AnalyticMapMethod mapMethod = new AnalyticMapMethod(executableElement, typeUtils, elementUtils);
 
         return new AnalyticTestCodeGenerator(testClass, mapMethod);
     }
 
     private MockTypeElement newMockTypeElement(){
-        MockTypeElement typeElement = new MockTypeElement();
+        MockTypeElement typeElement = new MockTypeElement(analyticTestClass);
 
         AnalyticTest spyAnno = mock(AnalyticTest.class);
-        when(spyAnno.varClass()).thenReturn(AnalyticTestCodeGeneratorTest.class);
+        when(spyAnno.varClass()).thenReturn(String.class);
         when(spyAnno.name()).thenReturn("TestUtils");
 
         typeElement.setAnnotation(spyAnno);
-        typeElement.setSimpleName(new MockName(SIMPLE_CLASS_NAME));
-        typeElement.setQualifiedName(new MockName(QUALIFIED_NAME));
 
         return typeElement;
     }
@@ -176,10 +191,25 @@ public class AnalyticTestCodeGeneratorTest {
         MockExecutableElement executableElement = new MockExecutableElement();
         executableElement.setSimpleName(new MockName(SIMPLE_METHOD_NAME));
 
+        Set<Modifier> modifiers = new HashSet<>();
+        modifiers.add(Modifier.PUBLIC);
+        modifiers.add(Modifier.STATIC);
+        executableElement.setModifier(modifiers);
+
+        final MockTypeMirror mockTypeMirror = new MockTypeMirror(Map.class);
+
+        List<MockTypeMirror> typeArguments = new ArrayList<>(2);
+        typeArguments.add(new MockTypeMirror(String.class));
+        typeArguments.add(new MockTypeMirror(Object.class));
+
+        mockTypeMirror.setTypeArguments(typeArguments);
+
+        executableElement.setReturnType(mockTypeMirror);
+
         return executableElement;
     }
 
-    private AnalyticFieldAdapter newMockFieldAdapter(String[] matchers){
+    private MockVariableElement newMockVariableElement(String[] matchers){
         MockVariableElement variableElement = new MockVariableElement();
 
         AnalyticVar spyAnno = mock(AnalyticVar.class);
@@ -195,6 +225,7 @@ public class AnalyticTestCodeGeneratorTest {
 
         variableElement.setModifiers(modifiers);
 
-        return new AnalyticFieldAdapter(variableElement);
+        return variableElement;
     }
+
 }

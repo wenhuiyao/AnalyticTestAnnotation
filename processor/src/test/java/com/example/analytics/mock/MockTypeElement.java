@@ -19,9 +19,13 @@ import java.util.Set;
  */
 public class MockTypeElement implements TypeElement {
 
-    private Name simpleName;
-    private Name qualifiedName;
+    private Class clazz;
+
     private Annotation annotation;
+
+    public MockTypeElement(Class clazz){
+        this.clazz = clazz;
+    }
 
     @Override
     public List<? extends Element> getEnclosedElements() {
@@ -38,23 +42,19 @@ public class MockTypeElement implements TypeElement {
         return null;
     }
 
-    public void setQualifiedName(Name name){
-        this.qualifiedName = name;
-    }
-
     @Override
     public Name getQualifiedName() {
-        return qualifiedName;
+        return new MockName(clazz.getCanonicalName());
     }
 
     @Override
     public TypeMirror asType() {
-        return null;
+        return new MockTypeMirror(clazz);
     }
 
     @Override
     public ElementKind getKind() {
-        return null;
+        return ElementKind.CLASS;
     }
 
     @Override
@@ -76,13 +76,9 @@ public class MockTypeElement implements TypeElement {
         return null;
     }
 
-    public void setSimpleName(Name simpleName){
-        this.simpleName = simpleName;
-    }
-
     @Override
     public Name getSimpleName() {
-        return simpleName;
+        return new MockName(clazz.getSimpleName());
     }
 
     @Override

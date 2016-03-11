@@ -12,7 +12,9 @@ import org.hamcrest.MatcherAssert;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.PackageElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -29,17 +31,17 @@ public class AnalyticTestCodeGenerator {
     private static final String METHOD_PREFIX = "assert";
 
     private final static String METHOD_ASSERT_THAT = "assertThat";
+    private final static String OBJECT_MAP = "map";
 
     private final AnalyticTestClass analyticClass;
     private final AnalyticMapMethod analyticMapMethod;
-    private final String MAP_OBJECT = "map";
 
-    public AnalyticTestCodeGenerator(AnalyticTestClass analyticClass, AnalyticMapMethod mapField) {
+    public AnalyticTestCodeGenerator(AnalyticTestClass analyticClass, AnalyticMapMethod mapMethod) {
         this.analyticClass = analyticClass;
-        this.analyticMapMethod = mapField;
+        this.analyticMapMethod = mapMethod;
     }
 
-    public void generateCode(List<AnalyticVarField> fields, Elements elementUtils,  Filer filer)
+    public void generateCode(List<AnalyticVarField> fields, Elements elementUtils,  Types typeUtils, Filer filer)
             throws IOException, ProcessingException {
 
         String finalClassName = analyticClass.getFinalClassName();
@@ -55,7 +57,7 @@ public class AnalyticTestCodeGenerator {
         for (AnalyticVarField field : fields) {
             final Set<String> hamcrestMatchers = field.getHamcrestMatchers();
             for (String hamcrestMatcher : hamcrestMatchers) {
-                typeSpec.addMethod(createMethod(hamcrestMatcher, field));
+                typeSpec.addMethod(createMethod(elementUtils, typeUtils, hamcrestMatcher, field));
             }
         }
 
@@ -75,7 +77,8 @@ public class AnalyticTestCodeGenerator {
      * </code>
      *
      */
-    MethodSpec createMethod(String hamcrestMatcher, AnalyticVarField field) throws ProcessingException {
+    MethodSpec createMethod(Elements elementUtils, Types typeUtils, String hamcrestMatcher, AnalyticVarField field)
+            throws ProcessingException {
         final CoreMatchersMethod coreMatchersMethod = CoreMatchersMethodFactory.newMethod(hamcrestMatcher);
         if (coreMatchersMethod == null) {
             throw new ProcessingException(analyticClass.getTypeElement(), "Please add %1s implementation to %2s",
@@ -101,12 +104,14 @@ public class AnalyticTestCodeGenerator {
         }
 
         // Map map = TestAnalytic.getMap();
-        method.addStatement( "$T $L = $L.$L()", Map.class, MAP_OBJECT, analyticClass.getSimpleName(),
+        method.addStatement( "$T $L = $L.$L()", Map.class, OBJECT_MAP, analyticClass.getSimpleName(),
                 analyticMapMethod.getSimpleName());
 
+        // (String)map.get("VAR_FIRST")
+        CodeBlock expectBlock = CodeBlock.builder().add("($T)$L.get($S)", coreMatchersMethod.expectedObjectType(elementUtils, typeUtils,
+                analyticMapMethod.getValueType()), OBJECT_MAP, field.getValue()).build();
+
         //  MatcherAssert.assertThat((String)map.get("VAR_FIRST"), CoreMatchers.containsString(str));
-        CodeBlock expectBlock = CodeBlock.builder().add("($T)$L.get($S)", coreMatchersMethod.expectedObjectType(),
-                MAP_OBJECT, field.getValue()).build();
         method.addStatement("$T.$L($L, $L)", MatcherAssert.class, METHOD_ASSERT_THAT, expectBlock, coreMatchersMethod
                 .methodBlock());
 

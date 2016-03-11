@@ -11,19 +11,19 @@ import java.util.Map;
  * Created by wyao on 3/9/16.
  */
 @AnalyticTest(varClass = VarContainer.class)
-public class SubclassTesting {
+public class SubclassAnalytic {
 
     private Map<String, Object> map = new HashMap<>();
 
-    private static SubclassTesting sInstance;
+    private static SubclassAnalytic sInstance;
 
-    public static SubclassTesting getInstance(){
+    public static SubclassAnalytic getInstance(){
         if( sInstance == null ) {
-            SubclassTesting instance = new SubclassTesting();
-            instance.map.put(VarContainer.VAR_ONE, "one");
-            instance.map.put(VarContainer.VAR_TWO, 2);
+            SubclassAnalytic instance = new SubclassAnalytic();
+            instance.map.put(VarContainer.VAR_ONE, "4");
+            instance.map.put(VarContainer.VAR_TWO, "two");
             instance.map.put("VAR_THREE", "three");
-            instance.map.put("VAR_FOUR", true);
+            instance.map.put("VAR_FOUR", "fourrrr");
 
             sInstance = instance;
         }

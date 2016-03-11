@@ -2,6 +2,7 @@ package com.example.analytics;
 
 import example.android.wenhui.annotation.AnalyticVar;
 
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,9 +23,11 @@ public class AnalyticVarField {
 
     private String fieldName;
 
-    public AnalyticVarField(AnalyticFieldAdapter fieldAdapter) throws ProcessingException {
-        fieldName = fieldAdapter.getSimpleName();
-        AnalyticVar annotation = fieldAdapter.getAnnotation(AnalyticVar.class);
+    public AnalyticVarField(VariableElement variableElement) throws ProcessingException {
+        validateVariable(variableElement);
+
+        fieldName = variableElement.getSimpleName().toString();
+        AnalyticVar annotation = variableElement.getAnnotation(AnalyticVar.class);
 
         String[] matches = annotation.matchers();
 
@@ -36,30 +39,20 @@ public class AnalyticVarField {
         if( matches != null && matches.length > 0 )
             hamcrestMatchers.addAll(Arrays.asList(matches));
 
-        value = getValue(fieldAdapter);
+        value = getValue(variableElement);
     }
 
-    private String getValue(AnalyticFieldAdapter fieldAdapter) throws ProcessingException {
+    private String getValue(VariableElement variableElement) throws ProcessingException {
         // Make sure the type is String type
-
-        final VariableElement variableElement = fieldAdapter.getVariableElement();
-
-        final String simpleName = fieldAdapter.getSimpleName();
-
-        Object v;
-        try {
-            v = fieldAdapter.getValue();
-        } catch (IllegalAccessException e) {
-            throw new ProcessingException(variableElement, "Expect %s to be package or public access",
-                    simpleName);
-        }
+        Object v = variableElement.getConstantValue();
 
         if (v == null) {
-            throw new ProcessingException(variableElement, "Expect %s to be final, and non null", simpleName);
+            throw new ProcessingException(variableElement, "Expect %s to be final, and non null", variableElement.getSimpleName());
         }
 
         if (!(v instanceof String)) {
-            throw new ProcessingException(variableElement, "Expect %s to be final and a String type", simpleName);
+            throw new ProcessingException(variableElement, "Expect %s to be final and a String type", variableElement
+                    .getSimpleName());
         }
 
         return (String)v;
@@ -75,5 +68,17 @@ public class AnalyticVarField {
 
     public Set<String> getHamcrestMatchers() {
         return hamcrestMatchers;
+    }
+
+    /**
+     * Make sure the field is a static final constant field field
+     */
+    private void validateVariable(VariableElement variableElement) throws ProcessingException {
+        // Make sure it is and static
+        final Set<Modifier> modifiers = variableElement.getModifiers();
+        if (!modifiers.contains(Modifier.STATIC)) {
+            throw new ProcessingException(variableElement, "The field @%s must be static field", AnalyticVar.class
+                    .getSimpleName());
+        }
     }
 }

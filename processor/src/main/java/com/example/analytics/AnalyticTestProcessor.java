@@ -15,19 +15,15 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static javax.lang.model.util.ElementFilter.fieldsIn;
@@ -83,11 +79,11 @@ public class AnalyticTestProcessor extends AbstractProcessor {
 
                 AnalyticMapMethod analyticMapMethod = extractAnalyticMap(typeElement);
 
-                final AnalyticTestClass analyticTestClass = new AnalyticTestClass(typeElement);
+                final AnalyticTestClass analyticTestClass = new AnalyticTestClass(typeElement, elementUtils);
                 final List<AnalyticVarField> analyticVarFields = extractOmnitureFieldVar(analyticTestClass);
 
                 AnalyticTestCodeGenerator codeGenerator = new AnalyticTestCodeGenerator(analyticTestClass, analyticMapMethod);
-                codeGenerator.generateCode(analyticVarFields, elementUtils, filer);
+                codeGenerator.generateCode(analyticVarFields, elementUtils, typeUtils, filer);
             }
 
         } catch (ProcessingException e) {
@@ -104,8 +100,7 @@ public class AnalyticTestProcessor extends AbstractProcessor {
         for (ExecutableElement executableElement : executableElements) {
             final AnalyticMap annotation = executableElement.getAnnotation(AnalyticMap.class);
             if (annotation != null) {
-                checkAnalyticMapMethod(executableElement);
-                return new AnalyticMapMethod(executableElement);
+                return new AnalyticMapMethod(executableElement, typeUtils, elementUtils);
             }
         }
         throw new ProcessingException(typeElement, "There is must be one @%1s in %2s", AnalyticMap.class
@@ -117,95 +112,18 @@ public class AnalyticTestProcessor extends AbstractProcessor {
             throws ProcessingException {
         ArrayList<AnalyticVarField> result = new ArrayList<>(20);
 
-        if (analyticTestClass.getVarClass() != null) {
-            final Class varClass = analyticTestClass.getVarClass();
+        final List<VariableElement> variableElements = fieldsIn(analyticTestClass.getVarTypeElement().getEnclosedElements());
 
-            Field[] fields = varClass.getDeclaredFields();
-            for (Field field : fields) {
-                AnalyticVarField f = newAnalyticField(new AnalyticFieldAdapter(field));
-                if (f != null) {
-                    result.add(f);
-                }
-            }
-
-        } else {
-            final List<VariableElement> variableElements = fieldsIn(analyticTestClass.getVarTypeElement().getEnclosedElements());
-
-            for (VariableElement variableElement : variableElements) {
-                AnalyticVarField f = newAnalyticField(new AnalyticFieldAdapter(variableElement));
-                if (f != null) {
-                    result.add(f);
-                }
+        for (VariableElement variableElement : variableElements) {
+            final AnalyticVar annotation = variableElement.getAnnotation(AnalyticVar.class);
+            if (annotation != null) {
+                debug("Auto generate test helper method for " + variableElement.getSimpleName());
+                result.add(new AnalyticVarField(variableElement));
             }
         }
-
         return result;
     }
 
-    /**
-     * @return A {@link AnalyticVarField} object if the field is annotated {@link AnalyticVar}, otherwise return null.
-     */
-    private AnalyticVarField newAnalyticField(AnalyticFieldAdapter analyticFieldAdapter) throws ProcessingException {
-        final AnalyticVar annotation = analyticFieldAdapter.getAnnotation(AnalyticVar.class);
-        if (annotation != null) {
-            // Make sure it is what we expected, static final field
-            checkAnalyticVariable(analyticFieldAdapter);
-            debug("Auto generate test helper method for " + analyticFieldAdapter.getFullName());
-            return new AnalyticVarField(analyticFieldAdapter);
-        }
-
-        return null;
-    }
-
-
-    /**
-     * The method to get map must be public static, and it must take no parameter, and return {@link java.util.Map}
-     */
-    private void checkAnalyticMapMethod(ExecutableElement element) throws ProcessingException {
-
-        final Set<Modifier> modifiers = element.getModifiers();
-
-        if (!modifiers.contains(Modifier.PUBLIC)) {
-            throw new ProcessingException(element, "The @%s method must be public", AnalyticMap.class.getSimpleName());
-        }
-
-        if (!modifiers.contains(Modifier.STATIC)) {
-            throw new ProcessingException(element, "The @%s method must be static", AnalyticMap.class.getSimpleName());
-        }
-
-        final List<? extends VariableElement> parameters = element.getParameters();
-        if (parameters != null && !parameters.isEmpty()) {
-            throw new ProcessingException(element, "The @%s method must have no parameter", AnalyticMap.class
-                    .getSimpleName());
-        }
-
-        final TypeMirror returnType = element.getReturnType();
-        String mapClass = Map.class.getCanonicalName();
-        if( returnType.getKind().isPrimitive() ){
-            throw new ProcessingException(element, "The @%1s method's return type must be %2s",
-                    AnalyticMap.class.getSimpleName(), mapClass);
-        }
-
-        String returnClass = ((TypeElement) typeUtils.asElement(returnType)).getQualifiedName().toString();
-        if (!mapClass.equals(returnClass)) {
-            throw new ProcessingException(element, "The @%1s method's return type must be %2s, but get %3s",
-                    AnalyticMap.class.getSimpleName(), mapClass, returnClass);
-        }
-    }
-
-    /**
-     * Make sure the field is a static final constant field field
-     */
-    private void checkAnalyticVariable(AnalyticFieldAdapter fieldAdapter) throws ProcessingException {
-        // Make sure it is and static
-        final VariableElement variableElement = fieldAdapter.getVariableElement();
-
-        if (!(java.lang.reflect.Modifier.isStatic(fieldAdapter.getModifiers()))) {
-            throw new ProcessingException(variableElement, "The field @%s must be static field", AnalyticVar.class
-                    .getSimpleName());
-        }
-
-    }
 
     /**
      * Prints an error message
