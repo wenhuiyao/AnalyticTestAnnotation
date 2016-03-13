@@ -147,7 +147,7 @@ public class AnalyticTestCodeGeneratorTest {
             covertTypeClass, String methodName){
         String EXPECTED_METHOD_FORMAT = "public static void assert%s%s(%s%s) {\n"
                         + "  java.util.Map map = %s.%s();\n"
-                        + "  org.hamcrest.MatcherAssert.assertThat((%s)map.get(\"%s\"), org.hamcrest.CoreMatchers.%s(%s));\n"
+                        + "  org.hamcrest.MatcherAssert.assertThat(%smap.get(\"%s\"), org.hamcrest.CoreMatchers.%s(%s));\n"
                         + "}\n";
 
         String parameterType ;
@@ -160,8 +160,12 @@ public class AnalyticTestCodeGeneratorTest {
             parameterType = "";
         }
 
+        String convertBlock = "";
+        if( covertTypeClass != Object.class ){
+            convertBlock = "(" + covertTypeClass.getCanonicalName() + ")";
+        }
         return String.format(EXPECTED_METHOD_FORMAT, VARIABLE_UPPER_LOWER, methodNameUpLow, parameterType,
-                objName, analyticTestClass.getSimpleName(), SIMPLE_METHOD_NAME, covertTypeClass.getCanonicalName(),
+                objName, analyticTestClass.getSimpleName(), SIMPLE_METHOD_NAME, convertBlock,
                 VARIABLE_VALUE, methodName, objName);
     }
 

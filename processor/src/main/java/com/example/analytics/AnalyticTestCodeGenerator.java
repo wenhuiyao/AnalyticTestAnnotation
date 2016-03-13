@@ -104,12 +104,20 @@ public class AnalyticTestCodeGenerator {
         }
 
         // Map map = TestAnalytic.getMap();
-        method.addStatement( "$T $L = $L.$L()", Map.class, OBJECT_MAP, analyticClass.getSimpleName(),
+        method.addStatement("$T $L = $L.$L()", Map.class, OBJECT_MAP, analyticClass.getSimpleName(),
                 analyticMapMethod.getSimpleName());
 
-        // (String)map.get("VAR_FIRST")
-        CodeBlock expectBlock = CodeBlock.builder().add("($T)$L.get($S)", coreMatchersMethod.expectedObjectType(elementUtils, typeUtils,
-                analyticMapMethod.getValueType()), OBJECT_MAP, field.getValue()).build();
+        final TypeMirror mapValueType = analyticMapMethod.getValueType();
+        final TypeMirror expectedObjectType = coreMatchersMethod.expectedObjectType(elementUtils, typeUtils, mapValueType);
+        // If the value type isn't changed, we don't need to convert the object
+        CodeBlock objectConversionBlock = null;
+        if( expectedObjectType != mapValueType ) {
+            objectConversionBlock = CodeBlock.builder().add("($T)", expectedObjectType).build();
+        }
+
+        // map.get("VAR_FIRST"), if the value type changed, it will be look like (String)map.get("VAR_FIRST")
+        CodeBlock expectBlock = CodeBlock.builder().add("$L$L.get($S)", objectConversionBlock == null ? "" :
+                objectConversionBlock, OBJECT_MAP, field.getValue()).build();
 
         //  MatcherAssert.assertThat((String)map.get("VAR_FIRST"), CoreMatchers.containsString(str));
         method.addStatement("$T.$L($L, $L)", MatcherAssert.class, METHOD_ASSERT_THAT, expectBlock, coreMatchersMethod

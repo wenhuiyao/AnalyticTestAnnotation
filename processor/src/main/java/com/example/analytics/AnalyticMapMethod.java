@@ -28,7 +28,7 @@ public class AnalyticMapMethod {
             ProcessingException {
         validateMethod(element);
 
-        setReturnMapValueType(element, typeUtils, elementUtils);
+        valueType = getReturnMapValueType(element, typeUtils, elementUtils);
 
         simpleName = element.getSimpleName().toString();
 
@@ -77,7 +77,7 @@ public class AnalyticMapMethod {
      * @param elementUtils
      * @throws ProcessingException
      */
-    private void setReturnMapValueType(ExecutableElement element, Types typeUtils, Elements elementUtils) throws
+    private TypeMirror getReturnMapValueType(ExecutableElement element, Types typeUtils, Elements elementUtils) throws
             ProcessingException {
         final TypeMirror returnType = element.getReturnType();
         if( returnType.getKind() != TypeKind.DECLARED ){
@@ -104,6 +104,6 @@ public class AnalyticMapMethod {
                     .getSimpleName(), String.class.getCanonicalName());
         }
 
-        valueType = typeArguments.get(1);
+        return typeArguments.get(1);
     }
 }
